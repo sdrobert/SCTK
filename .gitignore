@@ -38,3 +38,8 @@ src/stmValidator/stmValidator.pl
 src/tanweenFilt/makefile
 src/utf_filt/makefile
 
+# sdrobert
+build
+install
+.vscode
+

@@ -19,7 +19,7 @@
 /* modified the non-ANSI C definitions of readpipe so as to compile */
 /* on an AIX system  -Jon Fiscus                                    */
 
-#include <sctk.h>
+#include "sctk.h"
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -39,9 +39,9 @@
 
 /* Open a pipe to read from a program without intermediary sh.  Checks
    PATH.  Sample use:
-   
+
    stream = readpipe ("progname", "arg1", "arg2", (char *) 0);
-   
+
    Return 0 on error.  */
 
 #if __STDC__
@@ -94,7 +94,7 @@ va_dcl
 	    }
 	  close (fds[1]);	/* No longer needed. */
 	}
-      execvp (args[0], args);	
+      execvp (args[0], args);
       _exit (2);		/* 2 for `cmp'. */
     case -1:			/* Error. */
       return 0;

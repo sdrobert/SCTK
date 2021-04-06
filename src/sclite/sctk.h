@@ -9,8 +9,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #include <time.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +51,7 @@ extern "C" {
 #define TRUE		1
 #define FALSE		0
 
-/* bit field accessors, and query macros */ 
+/* bit field accessors, and query macros */
 #define BF_isSET(_v,_f)  (((_v) & (_f)) > 0)
 #define BF_notSET(_v,_f) (((_v) & (_f)) == 0)
 #define BF_SET(_v,_f)    _v |= (_f)
@@ -147,7 +150,7 @@ typedef struct set_score{
     int max_grp;           /* maximum number of path groups (speakers) */
     int num_grp;           /* current number of path groups */
     GRP *grp;              /* a list of path groups */
-    
+
     ARB_SSET aset;         /* struct of arbitrary labelling */
 } SCORES;
 

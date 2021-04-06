@@ -1,4 +1,4 @@
-#include <sctk.h>
+#include "sctk.h"
 
 void locate_next_file_channel(WTOKE_STR1 **ctms, int nctms, FILE **files, char **hypname, int *eofs, int *conv_end, int case_sense, int feedback);
 void print_linear(NODE *node, void *p);
@@ -31,7 +31,7 @@ void mfalign_ctm_files(char **hypname, int nhyps, int time_align, int case_sense
     alloc_singZ(eofs,nhyps,int,0);
     alloc_singZ(conv_end,nhyps,int,0);
     alloc_singZ(sil_end,nhyps,int,0);
-  
+
     /* OPEN FILES, INIT WTOKE'S, FILE WTOKE'S */
     for (in=0; in < nhyps; in++){
 	if ((files[in] = fopen(hypname[in],"r")) == NULL){
@@ -44,7 +44,7 @@ void mfalign_ctm_files(char **hypname, int nhyps, int time_align, int case_sense
     while (!done){
         locate_next_file_channel(ctms, nhyps, files, hypname, eofs, conv_end,
 				 case_sense, feedback);
-	
+
 	file = ctms[0]->word[ctms[0]->s].conv;
 	chan = ctms[0]->word[ctms[0]->s].turn;
 
@@ -56,10 +56,10 @@ void mfalign_ctm_files(char **hypname, int nhyps, int time_align, int case_sense
 
 		for (in=0; in<nhyps; in++){
 		    double beg, end;
-		    beg = (ctms[in]->s > conv_end[in]) ? -1.0 : 
+		    beg = (ctms[in]->s > conv_end[in]) ? -1.0 :
 			ctms[in]->word[sil_end[in]].t1 +
 			ctms[in]->word[sil_end[in]].dur;
-		    end = (sil_end[in] < conv_end[in]) ? 
+		    end = (sil_end[in] < conv_end[in]) ?
 		    ctms[in]->word[sil_end[in]+1].t1 : 9999999.9;
 		    printf("   CTM %d: start: %d end_word: %d start: %.2f"
 			   " end: %.2f\n",in,ctms[in]->s,sil_end[in],beg,end);
@@ -78,7 +78,7 @@ void mfalign_ctm_files(char **hypname, int nhyps, int time_align, int case_sense
 	    /* skip over this chunk because we're done with it. */
 	    done = 1;
 	    for (in=0; in < nhyps; in++){
-		ctms[in]->s = sil_end[in] + 
+		ctms[in]->s = sil_end[in] +
 		    ((sil_end[in] <= conv_end[in]) ? 1 : 0);
 		if (!eofs[in] || (ctms[in]->s < ctms[in]->n)) done = 0;
 	    }
@@ -86,7 +86,7 @@ void mfalign_ctm_files(char **hypname, int nhyps, int time_align, int case_sense
     }
     if (glob_ties > 0)
 	fprintf(stderr,"Warning: %d ties were arbitrarily broken\n",glob_ties);
-  
+
     /* FREE THE MEMORY */
     free_singarr(eofs, int);
     free_singarr(conv_end, int);
@@ -108,7 +108,7 @@ NETWORK *perform_mfalign(WTOKE_STR1 **ctms, int nctm, int *end, int time_align){
 
     alloc_singZ(nets,nctm,NETWORK *,(NETWORK *)0);
     null_alt = new_WORD((TEXT *)"@",-1,0.0,0.0,0.0,(TEXT *)0,(TEXT *)0,0,0,-1.0);
-     
+
     /* create the networks */
     for (in=0; in < nctm; in++){
 	if ((nets[in]=
@@ -121,17 +121,17 @@ NETWORK *perform_mfalign(WTOKE_STR1 **ctms, int nctm, int *end, int time_align){
 				       copy_WORD, make_empty_WORD,
 				       use_count_WORD,
 				       1))
-	    == NULL_NETWORK){ 
+	    == NULL_NETWORK){
 	    fprintf(stderr,"%s: Network_create_from_WTOKE failed\n",proc);
 	    exit(1);
 	}
 	/*	Network_traverse(nets[in],0,0,set_tag1,(void *)ctms[in]->id,0); */
     }
-    
+
     /* align the networks */
     Network_dpalign_n_networks(nets,nctm,(!time_align)?wwd_WORD_rover:wwd_time_WORD,
 			       &out_net,(void *)null_alt);
-    
+
     /* delete the networks */
     for (in=0; in < nctm; in++)
 	Network_destroy(nets[in]);
@@ -142,12 +142,12 @@ NETWORK *perform_mfalign(WTOKE_STR1 **ctms, int nctm, int *end, int time_align){
     return(out_net);
 }
 
-    
+
 void locate_next_file_channel(WTOKE_STR1 **ctms, int nctm, FILE **files, char **hypname, int *eofs, int *conv_end, int case_sense, int feedback){
     int in;
 
     /* locate the file boundaries */
-    for (in=0; in < nctm; in++){ 
+    for (in=0; in < nctm; in++){
 	fill_WTOKE_structure(ctms[in], files[in], hypname[in],
 			     &(eofs[in]), case_sense);
 	locate_boundary(ctms[in], ctms[in]->s, TRUE,TRUE,&(conv_end[in]));
@@ -162,7 +162,7 @@ void locate_next_file_channel(WTOKE_STR1 **ctms, int nctm, FILE **files, char **
 	    }
     }
     if (feedback >= 1) {
-	printf("Working on conversation: %s channel: %s\n",	
+	printf("Working on conversation: %s channel: %s\n",
 	       ctms[0]->word[ctms[0]->s].conv,
 	       ctms[0]->word[ctms[0]->s].turn);
 	for (in=0; in < nctm; in++)
@@ -172,7 +172,7 @@ void locate_next_file_channel(WTOKE_STR1 **ctms, int nctm, FILE **files, char **
 }
 
 /* This function looks for common periods of silence to all the  WTOKE
- * structures 
+ * structures
  */
 int find_common_silence(WTOKE_STR1 **ctms, int nctm, int *ctm_end, int *sil_end, double silence_dur){
     double mgap_beg, mgap_end;
@@ -209,8 +209,8 @@ int find_common_silence(WTOKE_STR1 **ctms, int nctm, int *ctm_end, int *sil_end,
 	}
 	sil_end[0] ++;
     }
-    /* ctm[0] is at the end of the road, move all the other ctms to the 
-     * end as well.  If there is data left in them, return 1 
+    /* ctm[0] is at the end of the road, move all the other ctms to the
+     * end as well.  If there is data left in them, return 1
      */
     if (dbg) printf("*** ctm[0] has ran out of data\n");
     more_data = 0;
@@ -252,7 +252,7 @@ void populate_tag1(NODE *node, void *p){
 	/* printf("   Arc %d not tagged\n",arc); */
 	for (f=0; f<Narc && hit < 0; f++){
 	  hit = f;
-	  /* printf("     is %d used? \n",f); */ 
+	  /* printf("     is %d used? \n",f); */
 	  /* does any  of the use elements == f */
 	  for (y=0; y<Narc; y++)
 	    if (use[y] == f)
@@ -265,16 +265,16 @@ void populate_tag1(NODE *node, void *p){
 	}
       }
     /* printf("   "); dump_singarr(use,Narc," %d",stdout); */
-    
+
     free_singarr(use,int);
   }
-  
+
 }
 
 int gap_at_times(WTOKE_STR1 *ctm, int end, double *mgap_beg, double *mgap_end, int *mgap_s){
     int i;
     double gap_end, gap_beg;
-    
+
     /* if there is no more data in this ctm, that answer is YES */
     if (ctm->s > end) {
 	*mgap_s = ctm->s;

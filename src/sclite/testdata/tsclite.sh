@@ -18,6 +18,7 @@ do
 	case $i in
         	-nc) clean="FALSE";;
                 -en) exe_name=$2;;
+                -ed) exe_dir=$2;;
 		-clean) echo "Cleaning out tsclite.sh's directory"
 			rm -rf $OUT Failed.log ; exit;;
 		-purify_status)
@@ -75,7 +76,7 @@ scliteCom="$exe_dir/${exe_name}"
 
 doit(){
    testid="$1"
-   desc="$2"  
+   desc="$2"
    com="$3"
    pipeInput="$4";
    prereq="$5"
@@ -86,18 +87,18 @@ doit(){
             $exe_dir/${exe_name} $com 1> $OUT/$testid.out 2> $OUT/$testid.err
         else
             echo "            **** SLM weighted alignment is disabled, not testing ***"
-        fi   
+        fi
    elif [ "$prereq" = "DIFF" ] ; then
         if test $DIFF_ENABLED = 1 ; then
             $exe_dir/${exe_name} $com 1> $OUT/$testid.out 2> $OUT/$testid.err
         else
             echo "            **** Diff alignments have been disabled, not testing ***"
-        fi   
+        fi
    elif [ "$pipeInput" = "" ] ; then
         $exe_dir/${exe_name} $com 1> $OUT/$testid.out 2> $OUT/$testid.err
-   else 
+   else
         $exe_dir/${exe_name} $com < $pipeInput 1> $OUT/$testid.out 2> $OUT/$testid.err
-   fi 
+   fi
 
 ### Creation date is now handled by the diff command
 #   if [ -f $OUT/$TEST.prf ] ; then
@@ -117,21 +118,21 @@ doit $TEST \
         "${SCLFLAGS} -r $DATA/csrnab.ref -h $DATA/csrnab.hyp -i wsj -o all snt spk dtl prf sgml nl.sgml -O $OUT -f 0 -n $TEST" \
         "" \
         ""
-        
+
 TEST=test1a
 doit $TEST \
         "Same as test1, but generating an sgml file, then piping to sclite for reports" \
         "${SCLFLAGS} -P -o dtl prf -O $OUT -f 0 -n $TEST" \
         test1.sgml \
 	""
-	
+
 TEST=test1b
 doit $TEST \
         "Same as test1, but using a language model for weights" \
         "${SCLFLAGS} -r $DATA/csrnab.ref -h $DATA/csrnab.hyp -i wsj -L $DATA/csrnab_r.blm -o sum wws prf -O $OUT -f 0 -n $TEST" \
         "" \
         "SLM"
-	
+
 TEST=test1c
 doit $TEST \
         "Same as test1, but using a language model for weights" \
@@ -192,7 +193,7 @@ doit $TEST \
 TN=4
 TEST=test$TN
 echo "Test $TN:     Same as test 3, but using diff for alignment"
-if test $DIFF_ENABLED = 1 ; then 
+if test $DIFF_ENABLED = 1 ; then
     $scliteCom ${SCLFLAGS} -r $DATA/lvc_ref.stm stm -h $DATA/lvc_hyp.ctm ctm \
 	-o all -O $OUT -f 0 -n $TEST -d \
 	1> $OUT/$TEST.out 2> $OUT/$TEST.err
@@ -226,7 +227,7 @@ else
     echo "            **** Diff alignments have been disabled, not testing ***"
 fi
 
-# TEST Number 7	
+# TEST Number 7
 TN=7
 TEST=test$TN
 echo "Test $TN:     Run some test cases through"
@@ -313,7 +314,7 @@ for utf in utf8-2bytes utf8-3bytes utf8-4bytes ; do
         "Same as test 1 but with $utf" \
         "${SCLFLAGS} -r $DATA/tests.ref.$utf -h $DATA/tests.hyp.$utf -i spu_id -o all sgml -O $OUT -f 0 -n $TEST -F -D -e utf-8" \
         "" \
-        ""        
+        ""
 done
 
 # TEST Number 8
@@ -346,7 +347,7 @@ TN=10
 TEST=test$TN
 echo "Test $TN:    Run the Mandarin, doing a character alignment, not effecting ASCII WORDS"
 echo $scliteCom ${SCLFLAGS} -e gb -r $DATA/mand_ref.stm stm -h $DATA/mand_hyp.ctm ctm \
-	-o all prf -O $OUT -f 0 -n $TEST -c NOASCII 
+	-o all prf -O $OUT -f 0 -n $TEST -c NOASCII
 
 $scliteCom ${SCLFLAGS} -e gb -r $DATA/mand_ref.stm stm -h $DATA/mand_hyp.ctm ctm \
 	-o all prf -O $OUT -f 0 -n $TEST -c NOASCII \

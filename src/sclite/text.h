@@ -9,6 +9,11 @@
 #define COMMENT_CHAR ';'
 #define COMMENT_INFO_CHAR '*'
 
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
+
 // ASCII - 7 bit
 // EXTASCII - Extended ASCII - 8 bit
 // GB - ASCII -+ 16 bit characters
@@ -58,7 +63,7 @@ TEXT *TEXT_strBcpy(TEXT *p, TEXT *t, int n);
 
 // TEXT* (TEXT *, TEXT *, TEXT)
 TEXT *TEXT_strcpy_escaped(TEXT *p1, TEXT *p2, TEXT chr);
- 
+
 // TEXT* (TEXT *, int *, FILE *)
 TEXT *TEXT_ensure_fgets(TEXT **arr, int *len, FILE *fp);
 
@@ -130,4 +135,4 @@ void dump_TEXT_LIST(TEXT_LIST *tl, FILE *);
 int in_TEXT_LIST(TEXT_LIST *tl, TEXT *str);
 int WORD_in_TEXT_LIST(void *data, void *elem);
 void TEXT_delete_chars(TEXT *arr, TEXT *set);
-
+int TEXT_set_lang_prof(char *lprof);

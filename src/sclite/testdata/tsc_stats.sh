@@ -20,7 +20,7 @@ do
                 -en) exe_name=$2;;
                 -ed) exe_dir=$2;;
 		-clean) echo "Cleaning out tsc_stats.sh's directory"
-			rm -rf $OUT Failed.log *.pvc *.pure *.pv; rclean-up; exit;;
+			rm -rf $OUT Failed.log *.pvc *.pure *.pv; exit;;
                 *) break;;
         esac
 	shift;
@@ -31,7 +31,7 @@ echo "Variables:"
 echo "    reference directory  =" $base_dir
 echo "    executable directory =" $exe_dir
 echo "    sc_stats executable    =" $exe_name
-echo "" 
+echo ""
 
 if [ -d $OUT ] ; then
 	echo "Shall I delete the output directory \"$OUT\"'s contents [y]"

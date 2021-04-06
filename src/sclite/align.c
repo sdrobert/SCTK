@@ -1,5 +1,8 @@
 #include "sctk.h"
 
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 void remove_id(TEXT *utt, TEXT **id, int *len);
 int extract_speaker(TEXT *hyp_id, TEXT *sname, enum id_types id);
@@ -20,13 +23,13 @@ void set_word_opt_del(ARC *arc, void *ptr);
 
 void remove_id(TEXT *utt, TEXT **id, int *id_len){
     TEXT *L_paren, *R_paren;
-    
+
     R_paren = TEXT_strrchr(utt,')');
     L_paren = TEXT_strrchr(utt,'(');
 
     **id = NULL_TEXT;
 
-    if (R_paren == NULL_TEXT && L_paren == NULL_TEXT)	
+    if (R_paren == NULL_TEXT && L_paren == NULL_TEXT)
 	return;
 
     if (R_paren == NULL_TEXT || L_paren == NULL_TEXT){
@@ -36,7 +39,7 @@ void remove_id(TEXT *utt, TEXT **id, int *id_len){
 
     /* make sure there is enough space */
     if (R_paren - L_paren + 1 + 1 > *id_len){
-	*id_len = R_paren - L_paren + 1 + 1 + 10; 
+	*id_len = R_paren - L_paren + 1 + 1 + 10;
 	free_singarr(*id,TEXT);
 	alloc_singZ((*id),*id_len,TEXT,'\0');
     }
@@ -73,8 +76,8 @@ int extract_speaker(TEXT *id, TEXT *sname, enum id_types idt){
 	    }
 	    return(1);
         }
-	TEXT_strBcpy(sname, id + 1, p - (id+1)); 
-	sname[p - (id+1)] = NULL_TEXT; 
+	TEXT_strBcpy(sname, id + 1, p - (id+1));
+	sname[p - (id+1)] = NULL_TEXT;
 	return(0);
       default:
 	fprintf(stderr,"Error: %s unknown id type\n",proc);
@@ -84,7 +87,7 @@ int extract_speaker(TEXT *id, TEXT *sname, enum id_types idt){
 
 /* free the reference transcripts */
 void free_refs(TEXT ***rset, TEXT ***ref_id, int refcnt){
-    free_2dimarr((*rset),refcnt,TEXT); 
+    free_2dimarr((*rset),refcnt,TEXT);
     free_2dimarr((*ref_id),refcnt,TEXT);
 }
 
@@ -101,13 +104,13 @@ void load_refs(SCORES *sc, char *hyp_file, char *ref_file, TEXT ***rset, TEXT **
     alloc_singZ(id_buf,id_buf_len,TEXT,'\0');
 
     /* Pre-Read the entire hypothesis file */
-    if ((hyp_file == NULL) || (*hyp_file == '\0') || 
+    if ((hyp_file == NULL) || (*hyp_file == '\0') ||
         ((fp = fopen(hyp_file,"r")) == NULL)){
         fprintf(stderr,"Can't open input hypothesis file %s\n",hyp_file);
         exit(1);
     }
     while (!feof(fp)){
-        *in_buf  = *(in_buf+1) = COMMENT_CHAR; 
+        *in_buf  = *(in_buf+1) = COMMENT_CHAR;
         *(in_buf+2) = NULL_TEXT;
         while (!feof(fp) && (parse_input_comment_line(sc,in_buf) ||
 			     TEXT_is_comment_info(in_buf) ||
@@ -136,10 +139,10 @@ void load_refs(SCORES *sc, char *hyp_file, char *ref_file, TEXT ***rset, TEXT **
     qsort((void *)idset,num_ids,sizeof(TEXT *),qsort_TEXT_strcmp);
 
     /* space for the reference transcripts allocate */
-    alloc_singZ(refset,num_ids,TEXT *,(TEXT *)0);  
-    
+    alloc_singZ(refset,num_ids,TEXT *,(TEXT *)0);
+
     /* Read the reference file, saving the needed texts */
-    if ((ref_file == NULL) || (*ref_file == '\0') || 
+    if ((ref_file == NULL) || (*ref_file == '\0') ||
         ((fp = fopen(ref_file,"r")) == NULL)){
         fprintf(stderr,"Can't open input Reference file %s\n",ref_file);
         exit(1);
@@ -148,7 +151,7 @@ void load_refs(SCORES *sc, char *hyp_file, char *ref_file, TEXT ***rset, TEXT **
 	TEXT **ind;
 	int rind;
 
-        *in_buf  = *(in_buf+1) = COMMENT_CHAR; 
+        *in_buf  = *(in_buf+1) = COMMENT_CHAR;
         *(in_buf+2) = NULL_TEXT;
         while (!feof(fp) && (parse_input_comment_line(sc,in_buf) ||
 			     TEXT_is_comment_info(in_buf) ||
@@ -172,7 +175,7 @@ void load_refs(SCORES *sc, char *hyp_file, char *ref_file, TEXT ***rset, TEXT **
 		    fprintf(stderr,"Error: double reference text for id '%s'\n",
 			    id_buf);
 		    failure=1;
-		} 
+		}
 	    } else {
 		refset[rind] = TEXT_strdup(in_buf);
 		num_ref++;
@@ -180,7 +183,7 @@ void load_refs(SCORES *sc, char *hyp_file, char *ref_file, TEXT ***rset, TEXT **
 	}
     }
     fclose(fp);
-    
+
     if (num_ref != num_ids){
 	failure=1;
 	fprintf(stderr,"Error: Not enough Reference files loaded\nMissing:\n");
@@ -190,7 +193,7 @@ void load_refs(SCORES *sc, char *hyp_file, char *ref_file, TEXT ***rset, TEXT **
     }
 
     /* space for the reference id's */
-    alloc_singZ(refids,num_ref,TEXT *,(TEXT *)0);  
+    alloc_singZ(refids,num_ref,TEXT *,(TEXT *)0);
     /* transfer the id's to the new array */
     memcpy(refids,idset,sizeof(TEXT *) * num_ref);
     /* free the idset array */
@@ -251,7 +254,7 @@ PATH *infer_word_seg_algo2(TEXT *ref, TEXT *hyp, NETWORK *hnet, int case_sense,c
             free_singarr(refCC, TEXT);
         }
     }
-    
+
     if (hyp != (TEXT *)0){
 	TEXT *hypCC = (case_sense ? TEXT_strdup(TEXT_str_to_master(hyp, 1)) : hyp);
 	if ((hypnet = Network_create_from_TEXT(hyp,"Hypothesis Net",
@@ -268,7 +271,7 @@ PATH *infer_word_seg_algo2(TEXT *ref, TEXT *hyp, NETWORK *hnet, int case_sense,c
         if (case_sense){
            free_singarr(hypCC, TEXT);
         }
-    } else 
+    } else
 	hypnet = hnet;
 
     if (opt_del){
@@ -294,10 +297,10 @@ PATH *infer_word_seg_algo2(TEXT *ref, TEXT *hyp, NETWORK *hnet, int case_sense,c
     PATH_add_utt_id(path,(char *)id);
     PATH_set_sequence(path);
     if (case_sense) BF_SET(path->attrib,PA_CASE_SENSE);
-    
+
     Network_destroy(refnet);
     Network_destroy(hypnet);
-    
+
     /* free_TEXT_LIST (&tl); */
     return(path);
 }
@@ -345,7 +348,7 @@ PATH *infer_word_seg_algo1(TEXT *ref, TEXT *hyp, NETWORK *hnet, int case_sense,c
 
     if (! case_sense){
         free_singarr(refCC, TEXT);
-    }    
+    }
     if (hyp != (TEXT *)0){
 	TEXT *hypCC = (! case_sense ? TEXT_strdup(TEXT_str_to_master(hyp, 1)) : hyp);
 	if ((hypnet = Network_create_from_TEXT(hypCC,"Hypothesis Net",
@@ -362,7 +365,7 @@ PATH *infer_word_seg_algo1(TEXT *ref, TEXT *hyp, NETWORK *hnet, int case_sense,c
         if (! case_sense){
             free_singarr(hypCC, TEXT);
         }
-    } else 
+    } else
 	hypnet = hnet;
 
 //       Network_traverse(hypnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);
@@ -386,16 +389,16 @@ PATH *infer_word_seg_algo1(TEXT *ref, TEXT *hyp, NETWORK *hnet, int case_sense,c
 
 //     printf("-----------------\n");
 //       Network_traverse(hypnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);
-//       Network_traverse(refnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);  
+//       Network_traverse(refnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);
 
     Network_dpalign(refnet,hypnet,wwd_WORD,&path,FALSE);
     PATH_add_utt_id(path,(char *)id);
     PATH_set_sequence(path);
     if (case_sense) BF_SET(path->attrib,PA_CASE_SENSE);
-    
+
     Network_destroy(refnet);
     Network_destroy(hypnet);
-    
+
     /* free_TEXT_LIST (&tl); */
     return(path);
 }
@@ -421,7 +424,7 @@ PATH *network_dp_align_texts(TEXT *ref, NETWORK *rnet, TEXT *hyp, NETWORK *hnet,
 //    printf("HYP -> %s\n",hyp);
     if (ref != (TEXT *)0){
       TEXT *refCC = (! case_sense ? TEXT_strdup(TEXT_str_to_master(ref, 1)) : ref);
-      
+
       if ((refnet = Network_create_from_TEXT(refCC, "Reference Net",print_WORD,
 					     equal_WORD2,
 					     release_WORD, null_alt_WORD,
@@ -456,7 +459,7 @@ PATH *network_dp_align_texts(TEXT *ref, NETWORK *rnet, TEXT *hyp, NETWORK *hnet,
       if (! case_sense){
         free_singarr(hypCC, TEXT);
       }
-    } else 
+    } else
 	hypnet = hnet;
 
     if (opt_del){
@@ -485,9 +488,9 @@ PATH *network_dp_align_texts(TEXT *ref, NETWORK *rnet, TEXT *hyp, NETWORK *hnet,
     }
 
 //        Network_traverse(hypnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);
-//        Network_traverse(refnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);  
+//        Network_traverse(refnet,NULL,0,print_arc,0,NT_CA_For+NT_Verbose);
     Network_dpalign(refnet,hypnet,
-		    ( (time_align) ? wwd_time_WORD : 
+		    ( (time_align) ? wwd_time_WORD :
 		      ( ((wwl != (WWL *)0) || (lm_file != (char *)0)) ?
 			 wwd_weight_WORD : wwd_WORD) ),
 		    &path,FALSE);
@@ -502,7 +505,7 @@ PATH *network_dp_align_texts(TEXT *ref, NETWORK *rnet, TEXT *hyp, NETWORK *hnet,
 
     Network_destroy(refnet);
     Network_destroy(hypnet);
-    
+
     return(path);
 }
 
@@ -521,7 +524,7 @@ SCORES *align_trans_mode_dp(char *ref_file, char *hyp_file, char *set_title, int
     alloc_singZ(hyp_id,hyp_id_len,TEXT,'\0');
     alloc_singZ(spkr_id,spkr_id_len,TEXT,'\0');
 
-    if ((hyp_file == NULL) || (*hyp_file == '\0') || 
+    if ((hyp_file == NULL) || (*hyp_file == '\0') ||
         ((fp_hyp = fopen(hyp_file,"r")) == NULL)){
         fprintf(stderr,"Can't open input hypothesis file %s\n",hyp_file);
         exit(1);
@@ -544,7 +547,7 @@ SCORES *align_trans_mode_dp(char *ref_file, char *hyp_file, char *set_title, int
     } else
       scor->weight_ali = 0;
 
-    load_refs(scor, hyp_file, ref_file, &reftran, &refid, &refcnt, case_sense); 
+    load_refs(scor, hyp_file, ref_file, &reftran, &refid, &refcnt, case_sense);
 
     while (!feof(fp_hyp)){
         *hyp_buff  = *(hyp_buff+1) = COMMENT_CHAR;
@@ -562,7 +565,7 @@ SCORES *align_trans_mode_dp(char *ref_file, char *hyp_file, char *set_title, int
 
 	extract_speaker(hyp_id,spkr_id,idt);
 	spk = SCORES_get_grp(scor,(char *)spkr_id);
-	
+
 	if (feedback >= 1){
 	    if (spk != last_spk) {  printf("\n"); last_spk = spk; }
 	    printf("\r    Alignment# %d for speaker %s          ",
@@ -586,7 +589,7 @@ SCORES *align_trans_mode_dp(char *ref_file, char *hyp_file, char *set_title, int
 	if (infer_word_seg == 0)
 	    path = network_dp_align_texts(reftran[rind], (NETWORK *)0,
 					  hyp_buff, (NETWORK *)0,
-					  char_align, case_sense, 
+					  char_align, case_sense,
 					  (char *)hyp_id, fcorr, opt_del, FALSE, wwl, lm_file);
 	else if (infer_word_seg == INF_SEG_ALGO1)
 	    path = infer_word_seg_algo1(reftran[rind], hyp_buff, (NETWORK *)0,
@@ -602,7 +605,7 @@ SCORES *align_trans_mode_dp(char *ref_file, char *hyp_file, char *set_title, int
 	}
 
 	if (feedback >= 2){
-	    printf("\n"); 
+	    printf("\n");
 	    PATH_print(path,stdout,199);
 	    printf("\n");
 	}
@@ -686,14 +689,14 @@ void expand_words_to_chars(ARC *arc, void *ptr){
     sprintf(buf,"expand-net %d",alt);
     TEXT_separate_chars((!tw->opt_del) ? tw->value : tw->intern_value,
 			&chars,&chars_len,*((int *)ptr));
-			
+
 //    printf("   from /%s/ comes /%s/\n",(!tw->opt_del) ? tw->value : tw->intern_value, chars);
-    
+
     // Escape the semicolon
     alloc_singZ(charsEsc, chars_len*2+1, TEXT, NULL_TEXT);
     TEXT_strcpy_escaped(charsEsc, chars, ';');
 //    printf("   and escaped /%s/\n", charsEsc);
-    
+
     /* Fix, it wasn't enough check to see if the there were any spaces */
     if (TEXT_strcmp(chars,tw->value) != 0){
 	subnet = Network_create_from_TEXT(charsEsc, buf, arc->net->arc_func.print,
@@ -711,7 +714,7 @@ void expand_words_to_chars(ARC *arc, void *ptr){
 	}
 	/* traverse the network, setting the character times to equal */
 	/* durations based on the original word */
-	{  
+	{
 	  double dur = tw->T_dur/subnet->arc_count, t1 = tw->T1, conf = tw->conf;
 	  int od = tw->opt_del;
 	  Network_traverse(subnet,NULL,0,set_word_duration,&dur,0);
@@ -730,16 +733,16 @@ void expand_words_to_chars(ARC *arc, void *ptr){
 }
 
 
-      
+
 void lookup_word_weight(ARC *arc, void *ptr){
     WORD *tw = (WORD *)(arc->data);
     WWL *wwl = (WWL *)ptr;
 
     if (tw->value == (TEXT *)0)
       tw->weight = 0.0;
-    else if (TEXT_strcmp(tw->value,(TEXT *)"@") == 0) 
+    else if (TEXT_strcmp(tw->value,(TEXT *)"@") == 0)
       tw->weight = 0.0;
-    else if (tw->opt_del) 
+    else if (tw->opt_del)
       tw->weight = 0.0;
     else
       tw->weight = Weight_wwl((tw->opt_del ? tw->intern_value : tw->value), wwl);
@@ -769,9 +772,9 @@ void decode_fragment(ARC *arc, void *ptr){
 
     if (tw->value == (TEXT *)0) return;
     len = TEXT_strlen(tw->value);
-    if (((*(tw->value + len - 1) == WORD_FRAG_CHAR) || 
+    if (((*(tw->value + len - 1) == WORD_FRAG_CHAR) ||
 	 (*(tw->value          ) == WORD_FRAG_CHAR))    ||
-	(tw->opt_del && 
+	(tw->opt_del &&
 	 (*(tw->value + len - 2) == WORD_FRAG_CHAR)))
       tw->frag_corr = TRUE;
 
@@ -818,7 +821,7 @@ void create_word_lists(SCORES *sc, TEXT **reftran, TEXT **refid, int refcnt, cha
     while (!feof(fp_hyp)){
         *hyp_buff  = *(hyp_buff+1) = COMMENT_CHAR;
         *(hyp_buff+2) = NULL_TEXT;
- 
+
         while (!feof(fp_hyp) && (parse_input_comment_line(sc,hyp_buff) ||
                                  TEXT_is_comment_info(hyp_buff) ||
                                  TEXT_is_empty(hyp_buff)))
@@ -855,7 +858,7 @@ void create_word_lists(SCORES *sc, TEXT **reftran, TEXT **refid, int refcnt, cha
 	    fprintf(fp_out_ref,"%s\n",ctext);
 	    ctext = tokenize_TEXT_first_alt(NULL,(TEXT *)" \t\n");
 	}
-	
+
 	ctext = TEXT_strtok(hyp_buff,(TEXT *)" \t\n");
 	while (ctext != NULL) {
 	    fprintf(fp_out_hyp,"%s\n",ctext);
@@ -908,8 +911,8 @@ void process_diff_line(TEXT *diff_out, PATH *path, TEXT **firsttoken){
       case P_SUB:
 	hwd = (WORD *)0;
 	switch (path->pset[path->num].eval){
-	  case P_CORR:  
-	  case P_INS:  
+	  case P_CORR:
+	  case P_INS:
 	    hwd = new_WORD(s2, -1, 0.0, 0.0, 0.0,(TEXT *)0, (TEXT *)0, 0, 0, -1.0); break;
 	  case P_SUB:
 	    hwd = new_WORD(s3, -1, 0.0, 0.0, 0.0,(TEXT *)0, (TEXT *)0, 0, 0, -1.0); break;
@@ -921,7 +924,7 @@ void process_diff_line(TEXT *diff_out, PATH *path, TEXT **firsttoken){
 	  fprintf(stderr,"Error: Failed to alloc word in process_diff_line\n");
 	  exit(1);
 	}
-	path->pset[path->num].b_ptr = hwd;		    
+	path->pset[path->num].b_ptr = hwd;
       case P_DEL:
 	;
     }
@@ -977,7 +980,7 @@ SCORES *align_trans_mode_diff(char *ref_file, char *hyp_file, char *set_title, i
 
     /* load the required reference sentences */
     if (feedback >= 1)	printf("    Loading transcripts\n");
-    load_refs(scor, hyp_file, ref_file, &reftran, &refid, &refcnt, case_sense); 
+    load_refs(scor, hyp_file, ref_file, &reftran, &refid, &refcnt, case_sense);
 
     /* create a file of words for both the ref and hyp */
     create_word_lists(scor, reftran, refid, refcnt, hyp_file,
@@ -990,7 +993,7 @@ SCORES *align_trans_mode_diff(char *ref_file, char *hyp_file, char *set_title, i
 	fprintf(stderr,"Error: Execution of 'diff' failed\n");
 	exit(1);
     }
-    
+
     if ((fp_hyp = fopen(hyp_file,"r")) == NULL){
         fprintf(stderr,"Can't open input hypothesis file %s\n",hyp_file);
         exit(1);
@@ -998,7 +1001,7 @@ SCORES *align_trans_mode_diff(char *ref_file, char *hyp_file, char *set_title, i
     while (!feof(fp_hyp)){
         *hyp_buff  = *(hyp_buff+1) = COMMENT_CHAR;
         *(hyp_buff+2) = NULL_TEXT;
- 
+
         while (!feof(fp_hyp) && (parse_input_comment_line(scor,hyp_buff) ||
                                  TEXT_is_comment_info(hyp_buff) ||
                                  TEXT_is_empty(hyp_buff)))
@@ -1029,12 +1032,12 @@ SCORES *align_trans_mode_diff(char *ref_file, char *hyp_file, char *set_title, i
 	while (ctext != NULL) {
 	    do {
 		check_space_in_PATH(path);
-		if (TEXT_ensure_fgets(&diff_out,&diff_out_len,fp_diff) == 
+		if (TEXT_ensure_fgets(&diff_out,&diff_out_len,fp_diff) ==
 			NULL)
 		    *diff_out = '\0';
 		if (feof(fp_diff)) break;
 		process_diff_line(diff_out,path,&firsttoken);
-	    } while (!feof(fp_diff) && 
+	    } while (!feof(fp_diff) &&
 		     ((TEXT_strcmp(firsttoken,ctext) != 0) || num_hyp==0));
 	    ctext = tokenize_TEXT_first_alt(NULL,(TEXT *)" \t\n");
 	}
@@ -1042,7 +1045,7 @@ SCORES *align_trans_mode_diff(char *ref_file, char *hyp_file, char *set_title, i
 	PATH_add_utt_id(path,(char *)hyp_id);
 	PATH_set_sequence(path);
 	if (case_sense) BF_SET(path->attrib,PA_CASE_SENSE);
-	
+
 	if (feedback >= 2){
 	    printf("\n");
 	    PATH_print(path,stdout,199);
@@ -1100,7 +1103,7 @@ SCORES *align_ctm_to_stm_diff(char *ref_file, char *hyp_file, char *set_title, i
     scor->creation_date = get_date();
 
     alloc_singZ(diff_out,diff_out_len,TEXT,'\0');
-    
+
     set_temp_files(refwords, hypwords);
 
     if ((fp_hyp = fopen(hyp_file,"r")) == NULL){
@@ -1122,7 +1125,7 @@ SCORES *align_ctm_to_stm_diff(char *ref_file, char *hyp_file, char *set_title, i
 	    locate_WTOKE_boundary(hyp_segs, hyp_segs->s, 1, 0, &hyp_file_end);
             just_read = 0;
             if ((hyp_file_end == hyp_segs->n) && !hyp_eof){
-                fill_mark_struct(fp_hyp,hyp_segs,hyp_file,&hyp_eof,&hyp_err, 
+                fill_mark_struct(fp_hyp,hyp_segs,hyp_file,&hyp_eof,&hyp_err,
 				 case_sense);
                 if (hyp_err != 0){
                     fprintf(stdout,"; *Err: Error detected in hyp file '%s'\n",
@@ -1147,7 +1150,7 @@ SCORES *align_ctm_to_stm_diff(char *ref_file, char *hyp_file, char *set_title, i
                     exit(1);
                 }
                 just_read = 1;
-            } else 
+            } else
 		just_read = 0;
         } while (just_read);
 
@@ -1256,7 +1259,7 @@ SCORES *align_ctm_to_stm_diff(char *ref_file, char *hyp_file, char *set_title, i
 			    *diff_out = '\0';
 			if (feof(fp_diff)) break;
 			process_diff_line(diff_out,path,&firsttoken);
-		    } while (!feof(fp_diff) && 
+		    } while (!feof(fp_diff) &&
 			     ((TEXT_strcmp(firsttoken,ctext) != 0) ||
 			      r== r_end + (r_end==stm->num)?-1:0));
 		    ctext = tokenize_TEXT_first_alt(NULL,(TEXT *)" \t\n");
@@ -1270,7 +1273,7 @@ SCORES *align_ctm_to_stm_diff(char *ref_file, char *hyp_file, char *set_title, i
 		PATH_add_channel(path,(char *)stm->seg[r].chan);
 		if (case_sense) BF_SET(path->attrib,PA_CASE_SENSE);
 		add_PATH_score(scor,path,spkr, keep_path);
-		
+
 		if (feedback >= 2){
 		    printf("\n");
 		    PATH_print(path,stdout,199);
@@ -1280,7 +1283,7 @@ SCORES *align_ctm_to_stm_diff(char *ref_file, char *hyp_file, char *set_title, i
 	    }
 	    fclose(fp_diff);
 
-    
+
 	    stm->s = r_end+1;
 	} /* for each channel */
 
@@ -1394,7 +1397,7 @@ SCORES *align_text_to_stm(char *ref_file, char *hyp_file, char *set_title, int k
 	/* parse the reference transcript */
 	parse_stm_line(&ref_seg, &ref_buf, &ref_buf_len, case_sense, 0);
 	num_ref --;
-	
+
 	/* allocate a path structure */
 	path = PATH_alloc(100);	path->num = 0;
 
@@ -1406,7 +1409,7 @@ SCORES *align_text_to_stm(char *ref_file, char *hyp_file, char *set_title, int k
 		    *diff_out = '\0';
 		if (feof(fp_diff)) break;
 		process_diff_line(diff_out,path,&firsttoken);
-	    } while (!feof(fp_diff) && 
+	    } while (!feof(fp_diff) &&
 		     ((TEXT_strcmp(firsttoken,ctext) != 0) || num_ref==0));
 	    ctext = tokenize_TEXT_first_alt(NULL,(TEXT *)" \t\n");
 	}
@@ -1420,7 +1423,7 @@ SCORES *align_text_to_stm(char *ref_file, char *hyp_file, char *set_title, int k
 	PATH_add_channel(path,(char *)ref_seg.chan);
 	if (case_sense) BF_SET(path->attrib,PA_CASE_SENSE);
 	add_PATH_score(scor,path,spkr, keep_path);
-	
+
 	if (feedback >= 2){
 	    printf("\n");
 	    PATH_print(path,stdout,199);
