@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -14,9 +14,9 @@
  * OR IMPLIED WARRANTY AS TO ANY MATTER WHATSOEVER, INCLUDING MERCHANTABILITY,
  * OR FITNESS FOR A PARTICULAR PURPOSE.
  */
- 
+
 #ifndef TEST_UNIT
-#define TEST_UNIT 
+#define TEST_UNIT
 
 #include "stdinc.h"
 #include "asctools.h"
@@ -48,19 +48,19 @@ void die_usage(string message);
 map<string, Benchmark*> benchmarks;
 
 int main(int argc, char** argv)
-{    
+{
   bool bench_mode = false;
   int repeat = 1;
   vector<string> args;
   Properties::Initialize();
   Properties::SetProperty("dataDirectory","../testfiles");
-  
+
   for(int i=1 ; i < argc ; i++)
   {
     if (string(argv[i]).compare("-b") == 0 || string(argv[i]).compare("--bench") == 0)
     {
       bench_mode = true;
-    } 
+    }
     else if(string(argv[i]).compare("-r") == 0 || string(argv[i]).compare("--repeat") == 0)
     {
       if (i+1 < argc)
@@ -70,25 +70,25 @@ int main(int argc, char** argv)
         {
           die_usage("repeat_time need to be an integer");
         }
-      } 
+      }
       else
       {
         die_usage("-r need an integer as argument");
       }
       i++;
-    } 
+    }
     else if(string(argv[i]).compare("-d") == 0 || string(argv[i]).compare("--datadir") == 0)
     {
       if (i+1 < argc)
       {
          Properties::SetProperty("dataDirectory",argv[i+1]);
-      } 
+      }
       else
       {
         die_usage("-d needs a directory name");
       }
       i++;
-    } 
+    }
     else
     {
       args.push_back(string(argv[i]));
@@ -103,17 +103,18 @@ int main(int argc, char** argv)
     {
       RunBenchmark(args[i], repeat);
     }
-  } 
+  }
   else
   {
     UnitTest();
   }
 
-	#ifdef WIN32
-	cout << "Press Enter to continue." << endl;
-	getchar();
-	#endif
-		
+	// XXX(sdrobert): why though?
+	// #ifdef WIN32
+	// cout << "Press Enter to continue." << endl;
+	// getchar();
+	// #endif
+
     return 0;
 }
 void UnitTest()
@@ -252,7 +253,7 @@ void UnitTest()
 	cout << "Starting Alignment tests..." << endl;
 	AlignmentTest* pAlignmentTest = new AlignmentTest;
 	pAlignmentTest->TestAll();
-	cout << "Alignment tests completed without failure!" << endl << endl;		
+	cout << "Alignment tests completed without failure!" << endl << endl;
 	//delete pAlignmentTest;
 
 	//test Properties
@@ -276,33 +277,33 @@ void RunBenchmark(string bench_name, int repeat)
 {
 	double time_before, duration;
 	Benchmark* bench = benchmarks[bench_name];
-	
+
 	if (!bench)
 	{
 		cout << "Benchmark : " << bench_name << " doesn't exist !!!" << endl;
 		exit(-1);
 	}
-	
+
 	double bench_before = timerStart();
 
-	printf("+--------------------------------------------+\n");  
+	printf("+--------------------------------------------+\n");
 	printf("| Benchmark : %10s                     |\n", bench_name.c_str());
-	
+
 	time_before = timerStart();
 	Levenshtein* laligner = new Levenshtein();
 	duration = timerEnd(time_before);
-	
+
 	printf("| Levenshtein creation: %2.3f ms             |\n", duration);
 	printf("| Repetition factor   : %5d                |\n", repeat);
 	printf("+---------+----------+------------+----------+\n");
 	printf("| test    | segments | alignement | results  |\n");
 	printf("+---------+----------+------------+----------+\n");
-  
+
 	for (std::size_t i=0 ; i < bench->GetTestSize() - 1 ; i++)
 	{
 		double t_segs, d_segs, t_align, d_align, t_res, d_res;
 		d_segs = d_align = d_res = 0.0;
-			
+
 		for (std::size_t j=0 ; j < repeat ; j++)
 		{
 			Properties::SetProperties(bench->GetProperties(i));
@@ -316,10 +317,10 @@ void RunBenchmark(string bench_name, int repeat)
 			laligner->GetResults();
 			d_res += timerEnd(t_res);
 		}
-		
+
 		printf("| test %2lu | %2.3f ms |  %2.3f ms  | %2.3f ms |\n", i, d_segs/repeat, d_align/repeat, d_res/repeat);
   }
-	
+
 	printf("+---------+----------+------------+----------+\n");
 	printf("| total   | %2.3f ms                         |\n", timerEnd(bench_before)/repeat);
 	printf("+---------+----------------------------------+\n");
@@ -329,7 +330,7 @@ void RunBenchmark(string bench_name, int repeat)
 void die_usage(string message)
 {
   cout << "Usage: asclite_test [-b|--bench bench_name] [-r|--repeat repeat_time] [-d|--datadir directoryNameOfTestFiles] [bench_name ...]" << endl;
-  
+
   cout << "       -d Default is '../testfiles'" << endl;
   cout << endl;
   cout << "  " << message << endl;

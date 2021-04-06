@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -28,7 +28,7 @@ void StdBenchmark::CreateSimpleSegment(string text1, string text2, string text3,
 	t_seg = Segment::CreateWithEndTime(0, 5000, speech);
 	t_tok0 = Token::CreateWithEndTime(0, 1000, t_seg, text1);
 	t_tok1 = Token::CreateWithEndTime(1000, 2000, t_seg, text2, t_tok0, NULL);
-	t_tok2 = Token::CreateWithEndTime(2000, 3000, t_seg, text3, t_tok1, NULL);  
+	t_tok2 = Token::CreateWithEndTime(2000, 3000, t_seg, text3, t_tok1, NULL);
 	a_tok1->SetToken(dim, t_tok0);
 	a_tok2->SetToken(dim, t_tok1);
 	a_tok3->SetToken(dim, t_tok2);
@@ -68,7 +68,7 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	results.push_back(t_ali_toks);
 
 	// 1: basic test
@@ -82,7 +82,7 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	results.push_back(t_ali_toks);
 
 	// 2: basic test
@@ -115,7 +115,7 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	results.push_back(t_ali_toks);
 
 	// 3: basic test
@@ -148,7 +148,7 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	results.push_back(t_ali_toks);
 
 	// 4: Basic test
@@ -177,7 +177,7 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	results.push_back(t_ali_toks);
 
 
@@ -207,7 +207,7 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	results.push_back(t_ali_toks);
 
 
@@ -322,14 +322,14 @@ StdBenchmark::StdBenchmark()
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok9);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok8);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok7);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok7);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok6);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok5);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok0); 
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
 	results.push_back(t_ali_toks);
 
 	// 7: multi dimension align 2
@@ -399,12 +399,12 @@ StdBenchmark::StdBenchmark()
 
 	tests.push_back(g_segs);
 
-	properties.push_back(props);	
+	properties.push_back(props);
 	costs["std"].push_back(0);
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok5);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
@@ -477,16 +477,16 @@ StdBenchmark::StdBenchmark()
 
 	tests.push_back(g_segs);
 
-	properties.push_back(props);	
+	properties.push_back(props);
 	costs["std"].push_back(400);
 
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok5);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
-	results.push_back(t_ali_toks); 
+	results.push_back(t_ali_toks);
 
 	// 9: multi dimension alignment designed to test the time-pruning option turned off
 	// multi dimension alignment of 3 tokens 1Hyp, 2Ref
@@ -503,7 +503,7 @@ StdBenchmark::StdBenchmark()
 	a_tok4 = new GraphAlignedToken(3);
 	a_tok5 = new GraphAlignedToken(3);
 
-	// Hyp1 : a b c 
+	// Hyp1 : a b c
 	t_seg = Segment::CreateWithEndTime(0, 6000, speech);
 	t_tok0 = Token::CreateWithEndTime(0, 1000, t_seg, "d");
 	t_tok1 = Token::CreateWithEndTime(1000, 2000, t_seg, "a", t_tok0, NULL);
@@ -543,14 +543,14 @@ StdBenchmark::StdBenchmark()
 
 	tests.push_back(g_segs);
 
-	properties.push_back(props);	
+	properties.push_back(props);
 	costs["std"].push_back(0);
 
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
-	results.push_back(t_ali_toks); 
+	results.push_back(t_ali_toks);
 
 	// 10: multi dimension alignment designed to test the time-pruning option turned ON
 	// multi dimension alignment of 3 tokens 1Hyp, 2Ref
@@ -559,9 +559,9 @@ StdBenchmark::StdBenchmark()
 	// Hyp1 : d a b c
 
 	props.clear();
-	props[string("align.timepruneoptimization")] = string("true");	
+	props[string("align.timepruneoptimization")] = string("true");
 	props[string("align.timepruneoptimizationthreshold")] = string("0");
-	props[string("align.timewordoptimization")] = string("true");	
+	props[string("align.timewordoptimization")] = string("true");
 	props[string("align.timewordoptimizationthreshold")] = string("0");
 	g_segs = new SegmentsGroup();
 	t_ali_toks = new GraphAlignedSegment(1);
@@ -572,7 +572,7 @@ StdBenchmark::StdBenchmark()
 	a_tok4 = new GraphAlignedToken(3);
 	a_tok5 = new GraphAlignedToken(3);
 
-	// Hyp1 : d a b c 
+	// Hyp1 : d a b c
 	t_seg = Segment::CreateWithEndTime(0, 6000, speech);
 	t_tok0 = Token::CreateWithEndTime(0, 1000, t_seg, "d");
 	t_tok1 = Token::CreateWithEndTime(1000, 2000, t_seg, "a", t_tok0, NULL);
@@ -615,15 +615,15 @@ StdBenchmark::StdBenchmark()
 
 	tests.push_back(g_segs);
 
-	properties.push_back(props);	
+	properties.push_back(props);
 	costs["std"].push_back(1000);
 
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);  	
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
-	results.push_back(t_ali_toks); 
+	results.push_back(t_ali_toks);
 
 	// 11: multi dimension alignment designed to test the time-pruning option turned OFF
 	// multi dimension alignment of 3 tokens 1Hyp, 2Ref
@@ -639,7 +639,7 @@ StdBenchmark::StdBenchmark()
 	a_tok2 = new GraphAlignedToken(3);
 	a_tok3 = new GraphAlignedToken(3);
 
-	// Hyp1 : d a b c 
+	// Hyp1 : d a b c
 	t_seg = Segment::CreateWithEndTime(0, 6000, speech);
 	t_tok0 = Token::CreateWithEndTime(0, 1000, t_seg, "d");
 	t_tok1 = Token::CreateWithEndTime(1000, 2000, t_seg, "a", t_tok0, NULL);
@@ -679,26 +679,26 @@ StdBenchmark::StdBenchmark()
 
 	tests.push_back(g_segs);
 
-	properties.push_back(props);	
+	properties.push_back(props);
 	costs["std"].push_back(0);
 
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
-	results.push_back(t_ali_toks); 
-	
+	results.push_back(t_ali_toks);
+
 	// 12: multi dimension align 2 + Speaker Optimization
 	// Ref1 <=> Hyp1 and Ref2 <=> Hyp2
 	// Hyp1 : * a d b *
 	// Hyp2 : d * * * c
 	// Ref1 : * * d b *
-	// Ref2 : * a * * c 
+	// Ref2 : * a * * c
 	// Costs: 3 1 0 0 0 = 4
 	props.clear();
 	props[string("align.speakeroptimization")] = string("true");
 	props[string("dataDirectory")] = string("../testfiles");
-	
+
 	g_segs = new SegmentsGroup();
 	t_ali_toks = new GraphAlignedSegment(2);
 	a_tok0 = new GraphAlignedToken(4);
@@ -706,7 +706,7 @@ StdBenchmark::StdBenchmark()
 	a_tok2 = new GraphAlignedToken(4);
 	a_tok3 = new GraphAlignedToken(4);
 	a_tok4 = new GraphAlignedToken(4);
-	
+
 	// Hyp1 : * a d b *
 	t_seg = Segment::CreateWithEndTime(0, 3000, speech);
 	t_tok0 = Token::CreateWithEndTime(0, 1000, t_seg, "a");
@@ -723,7 +723,7 @@ StdBenchmark::StdBenchmark()
 	t_seg->SetChannel("1");
 	t_seg->SetSpeakerId("Speaker_alpha");
 	g_segs->AddHypothesis(t_seg);
-	
+
 	// Hyp2 : d * * * c
 	t_seg = Segment::CreateWithEndTime(1000, 5000, speech);
 	t_tok0 = Token::CreateWithEndTime(1000, 2000, t_seg, "d");
@@ -739,7 +739,7 @@ StdBenchmark::StdBenchmark()
 	t_seg->SetChannel("1");
 	t_seg->SetSpeakerId("Speaker_beta");
 	g_segs->AddHypothesis(t_seg);
-	
+
 	// Ref1 : * * d b *
 	t_seg = Segment::CreateWithEndTime(1000, 5000, speech);
 	t_tok0 = Token::CreateWithEndTime(1000, 2000, t_seg, "d");
@@ -755,7 +755,7 @@ StdBenchmark::StdBenchmark()
 	t_seg->SetChannel("1");
 	t_seg->SetSpeakerId("Speaker_gamma");
 	g_segs->AddReference(t_seg);
-	
+
 	// Ref2 : * a * * c
 	t_seg = Segment::CreateWithEndTime(0, 3000, speech);
 	t_tok0 = Token::CreateWithEndTime(0, 1000, t_seg, "a");
@@ -771,17 +771,17 @@ StdBenchmark::StdBenchmark()
 	t_seg->SetChannel("1");
 	t_seg->SetSpeakerId("Speaker_delta");
 	g_segs->AddReference(t_seg);
-	
+
 	tests.push_back(g_segs);
 
 	properties.push_back(props);
 	costs["std"].push_back(400);
 
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);  	
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok4);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok3);
 	t_ali_toks->AddFrontGraphAlignedToken(a_tok2);
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);  	
-	t_ali_toks->AddFrontGraphAlignedToken(a_tok0); 
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok1);
+	t_ali_toks->AddFrontGraphAlignedToken(a_tok0);
 	results.push_back(t_ali_toks);
 }
 
@@ -807,7 +807,7 @@ StdBenchmark::~StdBenchmark()
 	delete a_tok8;
 	delete a_tok9;
 	delete a_tok0;
-	delete t_ali_toks;	
+	delete t_ali_toks;
 	delete speech;
 }
 

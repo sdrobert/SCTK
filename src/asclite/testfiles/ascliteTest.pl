@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 # asclite
 # Author: Jerome Ajot, Nicolas Radde, Chris Laprun
@@ -12,7 +12,7 @@
 # THIS SOFTWARE IS PROVIDED "AS IS."  With regard to this software, NIST MAKES NO EXPRESS
 # OR IMPLIED WARRANTY AS TO ANY MATTER WHATSOEVER, INCLUDING MERCHANTABILITY,
 # OR FITNESS FOR A PARTICULAR PURPOSE.
- 
+
 use strict;
 
 my $scliteCom = "../../sclite/sclite";
@@ -32,7 +32,7 @@ sub ok_quit { print(join(' ', @_), "\n"); &ok_exit(); }
 my $Usage = "Usage: ascliteTest.pl -s (all|sastt|std|mdm04|mdm04ByFile|cts04|mdmVariations|passed|notpassed) [ -m ]\n";
 my $suite = "std";
 my $bigMem = 0;
-my $result = GetOptions("s=s" => \$suite, "m" => \$bigMem);
+my $result = GetOptions("s=s" => \$suite, "m" => \$bigMem, "a=s" => \$ascliteCom, "b=s" => \$scliteCom);
 &error_quit("Aborting:\n$Usage\n") if (!$result);
 
 
@@ -56,7 +56,7 @@ if ($suite =~ /^(std|all|passed)$/)
     RunAscliteTest("CT-overlap-i-x-x",         "", "-r overlap.stm stm",         "-h overlap.ctm ctm CT-overlap-i-x-x");
     RunAscliteTest("CT-overlap-i-x-x",         "", "-r overlap.stm stm",         "-h overlap.ctm ctm CT-overlap-i-x-x -force-memory-compression");
 }
-    
+
 if ($suite =~ /^(mdm04|all|passed)$/)
 {
     RunAscliteTest("CT-mdm-full-i-F-D-ov1", "-noisg -F -D -overlap-limit 1",                           "-r rt04s.040420.mdm.overlap.stm.filt stm", "-h  rt04s.040810.mdm.overlap.ctm.filt ctm CT-mdm-full-i-F-D-ov1");
@@ -96,67 +96,67 @@ if ($suite =~ /^(generic|all|passed)$/)
 sub RunCompatTest
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
-    
+
     if (! -f "$compatOutDir/$testId.sgml")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         system "$scliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $compatOutDir/$testId.sgml";
     }
-	
+
     print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
     my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
     my $ret = system "$com |  perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $compatOutDir/$testId.sgml.asclite";
-        
+
     if ($ret != 0)
     {
         print "Error: Execution of '$com' returned code != 0\n";
-    } 
+    }
     else
-    { 
+    {
         my $diffCom = "diff $compatOutDir/$testId.sgml $compatOutDir/$testId.sgml.asclite";
         open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
         my @diff = <DIFF>;
         close DIFF;
-    
+
         if (@diff > 0)
         {
             print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
             $failure = 1;
-        } 
-        else 
+        }
+        else
         {
             print "      Successful Test.  Removing $testId.sgml.asclite\n";
             system "rm -rf $compatOutDir/$testId.sgml.asclite";
-        }	
+        }
     }
 }
 
 sub RunAscliteTest
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
-    
+
     if (! -f "$ascliteTestOutDir/$testId.sgml")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         system "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $ascliteTestOutDir/$testId.sgml";
-    } 
+    }
     else
     {
         print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
         my $ret = system "$com |  perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $ascliteTestOutDir/$testId.sgml.asclite";
-	
+
         if ($ret != 0)
         {
             print "Error: Execution of '$com' returned code != 0\n";
         }
-        else 
-        { 
+        else
+        {
             my $diffCom = "diff $ascliteTestOutDir/$testId.sgml $ascliteTestOutDir/$testId.sgml.asclite";
             open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
             my @diff = <DIFF>;
             close DIFF;
-            
+
             if (@diff > 0)
             {
                 print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
@@ -166,7 +166,7 @@ sub RunAscliteTest
             {
                 print "      Successful Test.  Removing $testId.sgml.asclite\n";
                 system "rm -rf $ascliteTestOutDir/$testId.sgml.asclite";
-            }	
+            }
         }
     }
 }
@@ -174,29 +174,29 @@ sub RunAscliteTest
 sub RunAscliteTestLog
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
-    
+
     if (! -f "$ascliteTestOutDir/$testId.log")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         system "$ascliteCom $opts $refOpts $hypOpts -f 6 2> $ascliteTestOutDir/$testId.log > /dev/null";
-    } 
+    }
     else
     {
         print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         my $com = "$ascliteCom $opts $refOpts $hypOpts -f 6";
         my $ret = system "$com 2> $ascliteTestOutDir/$testId.log.asclite > /dev/null";
-	
+
         if ($ret != 0)
         {
             print "Error: Execution of '$com' returned code != 0\n";
         }
-        else 
-        { 
+        else
+        {
             my $diffCom = "diff $ascliteTestOutDir/$testId.log $ascliteTestOutDir/$testId.log.asclite";
             open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
             my @diff = <DIFF>;
             close DIFF;
-            
+
             if (@diff > 0)
             {
                 print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
@@ -206,7 +206,7 @@ sub RunAscliteTestLog
             {
                 print "      Successful Test.  Removing $testId.sgml.asclite\n";
                 system "rm -rf $ascliteTestOutDir/$testId.log.asclite";
-            }	
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -47,8 +47,8 @@ void CTMInputParserTest::testBasicImport()
 	CTMInputParser* parser = new CTMInputParser();
 	SpeechSet* speechs = parser->loadFile(Properties::GetProperty("dataDirectory") + "/basic.ctm");
 	assert(speechs->GetNumberOfSpeech() == 1);
-	assert(speechs->GetSpeech(0)->NbOfSegments() == 19);	
-	
+	assert(speechs->GetSpeech(0)->NbOfSegments() == 19);
+
 	//test each words
 	assert(speechs->GetSpeech(0)->GetSegment(0)->GetFirstToken(0)->GetText() == "JAVA");
 	assert(speechs->GetSpeech(0)->GetSegment(1)->GetFirstToken(0)->GetText() == "WILL");
@@ -77,7 +77,7 @@ void CTMInputParserTest::testBasicImport()
 	assert(speechs->GetSpeech(0)->GetSegment(12)->GetLastToken(2)->GetText() == "alt2");
 	assert(speechs->GetSpeech(0)->GetSegment(13)->GetFirstToken(0)->GetText() == "last");
 	assert(speechs->GetSpeech(0)->GetSegment(14)->GetFirstToken(0)->GetText() == "verylast");
-  
+
 	assert(speechs->GetSpeech(0)->GetSegment(15)->GetFirstToken(0)->GetText() == "first");
 	assert(speechs->GetSpeech(0)->GetSegment(15)->GetFirstToken(0)->GetNbOfNextTokens() == 2);
 	assert(speechs->GetSpeech(0)->GetSegment(16)->GetNumberOfFirstToken() == 2);

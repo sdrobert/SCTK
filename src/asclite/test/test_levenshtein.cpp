@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -31,9 +31,12 @@ LevenshteinTest::~LevenshteinTest()
 
 void LevenshteinTest::TestGAS()
 {
+	// FIXME(sdrobert): StdBenchmark mucks with the global dataDirectory
+	// and doesn't set it back, so we do so here
+	const string data_dir = Properties::GetProperty("dataDirectory");
 	StdBenchmark* bench = new StdBenchmark();
 	Levenshtein* laligner = new Levenshtein();
-	
+
 	// hyp: a b c
 	// ref: a * c
 	Properties::SetProperties(bench->GetProperties(2));
@@ -49,7 +52,7 @@ void LevenshteinTest::TestGAS()
 	assert(res->GetNextNonNullReference(2) == NULL);
 	assert(res->GetNextNonNullReference(6) == NULL);
 	cout << "OK." << endl;
-	
+
 	// hyp: a b c
 	// ref: * * *
 	Properties::SetProperties(bench->GetProperties(4));
@@ -61,7 +64,7 @@ void LevenshteinTest::TestGAS()
 	assert(res->GetPreviousNonNullReference(1) == NULL);
 	assert(res->GetNextNonNullReference(1) == NULL);
 	cout << "OK." << endl;
-	
+
 	// hyp: a b c
 	// ref: a * c
 	Properties::SetProperties(bench->GetProperties(2));
@@ -77,7 +80,7 @@ void LevenshteinTest::TestGAS()
 	assert(res->GetNextNonNullReference(2) == NULL);
 	assert(res->GetNextNonNullReference(6) == NULL);
 	cout << "OK." << endl;
-	
+
 	// hyp: a b c
 	// ref: * * *
 	Properties::SetProperties(bench->GetProperties(4));
@@ -90,10 +93,14 @@ void LevenshteinTest::TestGAS()
 	assert(res->GetPreviousNonNullReference(1) == NULL);
 	assert(res->GetNextNonNullReference(1) == NULL);
 	cout << "OK." << endl;
+
+	Properties::SetProperty("dataDirectory", data_dir);
 }
 
 void LevenshteinTest::TestBasicBenchmark()
 {
+	// FIXME(sdrobert): here too
+	const string data_dir = Properties::GetProperty("dataDirectory");
 	StdBenchmark* bench = new StdBenchmark();
 	Levenshtein* laligner = new Levenshtein();
 
@@ -105,14 +112,14 @@ void LevenshteinTest::TestBasicBenchmark()
 		if(i == 12)
 		{
 			SpeakerMatch* pSpeakerMatch = new SpeakerMatch;
-			pSpeakerMatch->LoadFile(Properties::GetProperty("dataDirectory") + "/test12.mdalign.csv");
+			pSpeakerMatch->LoadFile(data_dir + "/test12.mdalign.csv");
 			laligner->SetSegments(bench->GetTest(i), pSpeakerMatch, false);
 		}
 		else
 		{
 			laligner->SetSegments(bench->GetTest(i), NULL, false);
 		}
-			
+
 		laligner->Align();
 		GraphAlignedSegment* res = laligner->GetResults();
 		bool ok_cost = (laligner->GetCost() == bench->GetCost(i, "std"));
@@ -134,13 +141,13 @@ void LevenshteinTest::TestBasicBenchmark()
 			{
 				cout << " expected " << bench->GetCost(i, "std") << ", got " << laligner->GetCost();
 			}
-				
-			cout << ", Alignement ";
-			
+
+			cout << ", Alignment ";
+
 			if (ok_align)
 			{
 				cout << "OK" << endl;
-			} 
+			}
 			else
 			{
 				cout << "Failed" << endl;
@@ -151,6 +158,7 @@ void LevenshteinTest::TestBasicBenchmark()
 			}
 		}
 	}
+	Properties::SetProperty("dataDirectory", data_dir);
 }
 
 void LevenshteinTest::TestAll()
