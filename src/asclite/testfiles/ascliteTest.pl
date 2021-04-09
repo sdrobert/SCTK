@@ -16,6 +16,7 @@
 use strict;
 use Getopt::Long;
 use File::Spec;
+use File::Compare qw(compare_text);
 
 my $scliteCom = "../../sclite/sclite";
 my $ascliteCom = "../core/asclite";
@@ -40,10 +41,39 @@ $scliteCom = File::Spec->canonpath($scliteCom);
 $ascliteCom = File::Spec->canonpath($ascliteCom);
 
 my $perl_pipe;
+my $nul;
 if ("$^O" =~ /Win/) {
     $perl_pipe = 'perl -pe "s/(creation_date="")[^\""]+/$1/"';
+    $nul = "nul"
 } else {
     $perl_pipe = "perl -pe 's/(creation_date=\")[^\"]+/\$1/'";
+    $nul = "/dev/null"
+}
+
+sub check_result {
+    my ($testId, $com, $ret, $exp, $act) = @_;
+    if ($ret != 0)
+    {
+        print "Error: Execution of '$com' returned code != 0\n";
+        $failure = 1;
+        return;
+    }
+    if (compare_text($exp, $act)) {
+        # only do diff if the text differs (to minimize incompatibility chance)
+        my $diffCom = "diff $exp $act";
+        open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
+        my @diff = <DIFF>;
+        close DIFF;
+
+        if (@diff > 0)
+        {
+            print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
+            $failure = 1;
+            return;
+        }
+    }
+    print "      Successful Test.  Removing $act\n";
+    unlink $act;
 }
 
 if ($suite =~ /^(std|all|passed)$/)
@@ -117,29 +147,7 @@ sub RunCompatTest
     my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
     my $ret = system "$com |  $perl_pipe > $compatOutDir/$testId.sgml.asclite";
 
-    if ($ret != 0)
-    {
-        print "Error: Execution of '$com' returned code != 0\n";
-        $failure = 1;
-    }
-    else
-    {
-        my $diffCom = "diff $compatOutDir/$testId.sgml $compatOutDir/$testId.sgml.asclite";
-        open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
-        my @diff = <DIFF>;
-        close DIFF;
-
-        if (@diff > 0)
-        {
-            print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
-            $failure = 1;
-        }
-        else
-        {
-            print "      Successful Test.  Removing $testId.sgml.asclite\n";
-            system "rm -rf $compatOutDir/$testId.sgml.asclite";
-        }
-    }
+    check_result($testId, $com, $ret, "$compatOutDir/$testId.sgml", "$compatOutDir/$testId.sgml.asclite");
 }
 
 sub RunAscliteTest
@@ -157,29 +165,7 @@ sub RunAscliteTest
         my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
         my $ret = system "$com |  $perl_pipe > $ascliteTestOutDir/$testId.sgml.asclite";
 
-        if ($ret != 0)
-        {
-            print "Error: Execution of '$com' returned code != 0\n";
-            $failure = 1;
-        }
-        else
-        {
-            my $diffCom = "diff $ascliteTestOutDir/$testId.sgml $ascliteTestOutDir/$testId.sgml.asclite";
-            open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
-            my @diff = <DIFF>;
-            close DIFF;
-
-            if (@diff > 0)
-            {
-                print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
-                $failure = 1;
-            }
-            else
-            {
-                print "      Successful Test.  Removing $testId.sgml.asclite\n";
-                system "rm -rf $ascliteTestOutDir/$testId.sgml.asclite";
-            }
-        }
+        check_result($testId, $com, $ret, "$ascliteTestOutDir/$testId.sgml", "$ascliteTestOutDir/$testId.sgml.asclite");
     }
 }
 
@@ -190,36 +176,14 @@ sub RunAscliteTestLog
     if (! -f "$ascliteTestOutDir/$testId.log")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-        system "$ascliteCom $opts $refOpts $hypOpts -f 6 2> $ascliteTestOutDir/$testId.log > /dev/null";
+        system "$ascliteCom $opts $refOpts $hypOpts -f 6 2> $ascliteTestOutDir/$testId.log > $nul";
     }
     else
     {
         print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         my $com = "$ascliteCom $opts $refOpts $hypOpts -f 6";
-        my $ret = system "$com 2> $ascliteTestOutDir/$testId.log.asclite > /dev/null";
+        my $ret = system "$com 2> $ascliteTestOutDir/$testId.log.asclite > $nul";
 
-        if ($ret != 0)
-        {
-            print "Error: Execution of '$com' returned code != 0\n";
-            $failure = 1;
-        }
-        else
-        {
-            my $diffCom = "diff $ascliteTestOutDir/$testId.log $ascliteTestOutDir/$testId.log.asclite";
-            open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
-            my @diff = <DIFF>;
-            close DIFF;
-
-            if (@diff > 0)
-            {
-                print "Error: Test $testId has failed.  Diff output is :\n@diff\n" ;
-                $failure = 1;
-            }
-            else
-            {
-                print "      Successful Test.  Removing $testId.sgml.asclite\n";
-                system "rm -rf $ascliteTestOutDir/$testId.log.asclite";
-            }
-        }
+        check_result($testId, $com, $ret, "$ascliteTestOutDir/$testId.log", "$ascliteTestOutDir/$testId.log.asclite");
     }
 }
