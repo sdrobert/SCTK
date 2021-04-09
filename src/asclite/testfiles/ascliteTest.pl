@@ -14,13 +14,14 @@
 # OR FITNESS FOR A PARTICULAR PURPOSE.
 
 use strict;
+use Getopt::Long;
+use File::Spec;
 
 my $scliteCom = "../../sclite/sclite";
 my $ascliteCom = "../core/asclite";
 my $compatOutDir = "scliteCompatTestOutDir";
 my $ascliteTestOutDir = "ascliteTestOutDir";
 my $failure = 0;
-use Getopt::Long;
 
 ####################
 sub error_exit { exit(1); }
@@ -35,6 +36,15 @@ my $bigMem = 0;
 my $result = GetOptions("s=s" => \$suite, "m" => \$bigMem, "a=s" => \$ascliteCom, "b=s" => \$scliteCom);
 &error_quit("Aborting:\n$Usage\n") if (!$result);
 
+$scliteCom = File::Spec->canonpath($scliteCom);
+$ascliteCom = File::Spec->canonpath($ascliteCom);
+
+my $perl_pipe;
+if ("$^O" =~ /Win/) {
+    $perl_pipe = 'perl -pe "s/(creation_date="")[^\""]+/$1/"';
+} else {
+    $perl_pipe = "perl -pe 's/(creation_date=\")[^\"]+/\$1/'";
+}
 
 if ($suite =~ /^(std|all|passed)$/)
 {
@@ -100,16 +110,17 @@ sub RunCompatTest
     if (! -f "$compatOutDir/$testId.sgml")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-        system "$scliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $compatOutDir/$testId.sgml";
+        system "$scliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $compatOutDir/$testId.sgml";
     }
 
     print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
     my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
-    my $ret = system "$com |  perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $compatOutDir/$testId.sgml.asclite";
+    my $ret = system "$com |  $perl_pipe > $compatOutDir/$testId.sgml.asclite";
 
     if ($ret != 0)
     {
         print "Error: Execution of '$com' returned code != 0\n";
+        $failure = 1;
     }
     else
     {
@@ -138,17 +149,18 @@ sub RunAscliteTest
     if (! -f "$ascliteTestOutDir/$testId.sgml")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-        system "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $ascliteTestOutDir/$testId.sgml";
+        system "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $ascliteTestOutDir/$testId.sgml";
     }
     else
     {
         print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
-        my $ret = system "$com |  perl -pe 's/(creation_date=\")[^\"]+/\$1/' > $ascliteTestOutDir/$testId.sgml.asclite";
+        my $ret = system "$com |  $perl_pipe > $ascliteTestOutDir/$testId.sgml.asclite";
 
         if ($ret != 0)
         {
             print "Error: Execution of '$com' returned code != 0\n";
+            $failure = 1;
         }
         else
         {
@@ -189,6 +201,7 @@ sub RunAscliteTestLog
         if ($ret != 0)
         {
             print "Error: Execution of '$com' returned code != 0\n";
+            $failure = 1;
         }
         else
         {
