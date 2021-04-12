@@ -1,10 +1,3 @@
-#!/usr/bin/env perl
-#
-# $Id$
-
-use warnings;
-use strict;
-
 #! /usr/bin/env perl
 use warnings;
 use strict;
@@ -64,27 +57,15 @@ sub run_test {
   }
 }
 
-my $prefix = "$perl slatreport.pl";
+my $prefix = "$perl stmValidator.pl";
 
-run_test("slat_rttm_out", "$prefix -i $indir/slat.rttm -o $outdir/slat.rttm.out.test -t LEXEME -s lex | $perl -ne \"print unless /PNG:/\"", "slat.rttm.out");
-
-# system("./slatreport.pl -i ../test_suite/slat.rttm -o ../test_suite/slat.rttm.out.test -t LEXEME -s lex | grep -v 'PNG:' > ../test_suite/slat.rttm.out.test");
-
-# unlink("../test_suite/slat.rttm.out.test.SPLbDistribution.10.png");
-# unlink("../test_suite/slat.rttm.out.test.SPLmDistribution.10.png");
-# unlink("../test_suite/slat.rttm.out.test.SPLeDistribution.10.png");
-
-# my $diff = `diff ../test_suite/slat.rttm.out ../test_suite/slat.rttm.out.test`;
-
-# if($diff ne "")
-# {
-# 	print "Slat Test Failed.\n";
-# 	print "$diff\n";
-# 	exit(1);
-# }
-# else
-# {
-# 	print "Slat Test OK.\n";
-# 	unlink("../test_suite/slat.rttm.out.test");
-# 	exit(0);
-# }
+for (my $i = 1; $i < 37; ++$i) {
+  my $tn = sprintf("test%02d", $i);
+  if (-f "$indir/$tn.stm" && -f "$indir/$tn.log.saved") {
+    if (-f "$indir/$tn.stm.toskip") {
+      print "$tn skipped\n";
+    } else {
+      run_test("$tn", "$prefix -i $indir/$tn.stm | perl -pe \"s/^Validated .*$tn\.stm/Validated $tn.stm/\"", "$tn.log.saved");
+    }
+  }
+}

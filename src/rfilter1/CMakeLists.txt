@@ -16,19 +16,11 @@ install(
 )
 
 if (TESTING_RFILTER1)
-  if (UNIX)
-    # easy enough for unix
-    add_test(
-      NAME test_rfilter1_arb2004
-      COMMAND bash -c "$1 $2.glm < $2.txt | diff - $2.txt.rfilter1" -- $<TARGET_FILE:rfilter1> ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite/test.arb2004
-    )
-    add_test(
-      NAME test_rfilter1_man2004
-      COMMAND bash -c "$1 $2.glm < $2.txt | diff - $2.txt.rfilter1" -- $<TARGET_FILE:rfilter1> ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite/test.man2004
-    )
-  elseif (WIN32)
-    # uh oh
-  endif()
-# ./rfilter1 ../test_suite/test.arb2004.glm < ../test_suite/test.arb2004.txt | diff - ../test_suite/test.arb2004.txt.rfilter1
-# ./rfilter1 ../test_suite/test.man2004.glm < ../test_suite/test.man2004.txt | diff - ../test_suite/test.man2004.txt.rfilter1
+  find_package(Perl REQUIRED)
+  add_test(
+    NAME test_ctm_validator
+    COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/RFilter1Tests.pl
+      -i ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite
+      $<TARGET_FILE:rfilter1>
+  )
 endif()

@@ -1,10 +1,3 @@
-#!/usr/bin/env perl
-#
-# $Id$
-
-use warnings;
-use strict;
-
 #! /usr/bin/env perl
 use warnings;
 use strict;
@@ -49,42 +42,34 @@ unless (defined($outdir)) {
 sub run_test {
   my ($name, $cmd, $exp) = @_;
   print "Beginning $name\n";
+  my $tmp = new File::Temp();
+  close($tmp);
   $exp = File::Spec->catfile($indir, $exp);
+  # first have to filter out lines that contain RTTMValidator
+  system "$perl -ne \"print unless /RTTMValidator/;\" < $exp > $tmp";
   my $act = File::Spec->catfile($outdir, basename($exp).".act");
   open(my $act_fh, '>', $act);
   print $act_fh `$cmd`;
   # die "$name error: $!" if $?;
   close($act_fh);
-  if (compare_text($exp, $act)) {
+  if (compare_text($tmp->filename, $act)) {
     print "$name failed\n";
-    system "diff", $exp, $act;
+    system "diff", $tmp->filename, $act;
     die;
   } else {
     print "$name passed\n";
   }
 }
 
-my $prefix = "$perl slatreport.pl";
+my $prefix = "$perl rttmValidator.pl -S -t";
 
-run_test("slat_rttm_out", "$prefix -i $indir/slat.rttm -o $outdir/slat.rttm.out.test -t LEXEME -s lex | $perl -ne \"print unless /PNG:/\"", "slat.rttm.out");
-
-# system("./slatreport.pl -i ../test_suite/slat.rttm -o ../test_suite/slat.rttm.out.test -t LEXEME -s lex | grep -v 'PNG:' > ../test_suite/slat.rttm.out.test");
-
-# unlink("../test_suite/slat.rttm.out.test.SPLbDistribution.10.png");
-# unlink("../test_suite/slat.rttm.out.test.SPLmDistribution.10.png");
-# unlink("../test_suite/slat.rttm.out.test.SPLeDistribution.10.png");
-
-# my $diff = `diff ../test_suite/slat.rttm.out ../test_suite/slat.rttm.out.test`;
-
-# if($diff ne "")
-# {
-# 	print "Slat Test Failed.\n";
-# 	print "$diff\n";
-# 	exit(1);
-# }
-# else
-# {
-# 	print "Slat Test OK.\n";
-# 	unlink("../test_suite/slat.rttm.out.test");
-# 	exit(0);
-# }
+for (my $i = 1; $i < 37; ++$i) {
+  my $tn = sprintf("test%02d", $i);
+  if (-f "$indir/$tn.rttm" && -f "$indir/$tn.log.saved") {
+    if (-f "$indir/$tn.rttm.toskip") {
+      print "$tn skipped\n";
+    } else {
+      run_test("$tn", "$prefix -i $indir/$tn.rttm | $perl -ne \"print unless /RTTMValidator/;\"", "$tn.log.saved");
+    }
+  }
+}

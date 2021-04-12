@@ -1,22 +1,14 @@
-#!/usr/bin/env perl
-#
-# $Id$
-
-use warnings;
-use strict;
-
 #! /usr/bin/env perl
 use warnings;
 use strict;
 
-use Config;
 use Getopt::Long;
 use File::Temp;
 use File::Spec;
 use File::Basename;
 use File::Compare qw(compare_text);
 
-my $usage = "Usage: $0 [<OPTIONS>]
+my $usage = "Usage: $0 [<OPTIONS>] <rfilter_path>
 
 OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
@@ -25,7 +17,6 @@ OPTIONS
 
 my $outdir;
 my $indir = ".";
-my $perl = $Config{perlpath};
 
 GetOptions(
   "o=s" => sub {
@@ -41,6 +32,11 @@ GetOptions(
     $indir = File::Spec->canonpath($opt_value);
   }
 ) or die "$usage";
+
+die $usage unless (@ARGV == 1);
+my $rfilter1_path = File::Spec->canonpath(shift);
+die "Error: $rfilter1_path does not exist or is not an executable"
+  unless (-x $rfilter1_path);
 
 unless (defined($outdir)) {
   $outdir = File::Temp->newdir();
@@ -64,27 +60,7 @@ sub run_test {
   }
 }
 
-my $prefix = "$perl slatreport.pl";
-
-run_test("slat_rttm_out", "$prefix -i $indir/slat.rttm -o $outdir/slat.rttm.out.test -t LEXEME -s lex | $perl -ne \"print unless /PNG:/\"", "slat.rttm.out");
-
-# system("./slatreport.pl -i ../test_suite/slat.rttm -o ../test_suite/slat.rttm.out.test -t LEXEME -s lex | grep -v 'PNG:' > ../test_suite/slat.rttm.out.test");
-
-# unlink("../test_suite/slat.rttm.out.test.SPLbDistribution.10.png");
-# unlink("../test_suite/slat.rttm.out.test.SPLmDistribution.10.png");
-# unlink("../test_suite/slat.rttm.out.test.SPLeDistribution.10.png");
-
-# my $diff = `diff ../test_suite/slat.rttm.out ../test_suite/slat.rttm.out.test`;
-
-# if($diff ne "")
-# {
-# 	print "Slat Test Failed.\n";
-# 	print "$diff\n";
-# 	exit(1);
-# }
-# else
-# {
-# 	print "Slat Test OK.\n";
-# 	unlink("../test_suite/slat.rttm.out.test");
-# 	exit(0);
-# }
+run_test("arb2004", "$rfilter1_path $indir/test.arb2004.glm < $indir/test.arb2004.txt", "test.arb2004.txt.rfilter1");
+run_test("man2004", "$rfilter1_path $indir/test.man2004.glm < $indir/test.man2004.txt", "test.man2004.txt.rfilter1");
+# ./rfilter1 ../test_suite/test.arb2004.glm < ../test_suite/test.arb2004.txt | diff - ../test_suite/test.arb2004.txt.rfilter1
+# ./rfilter1 ../test_suite/test.man2004.glm < ../test_suite/test.man2004.txt | diff - ../test_suite/test.man2004.txt.rfilter1

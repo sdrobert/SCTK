@@ -14,7 +14,6 @@ my $usage = "Usage: $0 [<OPTIONS>]
 OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
   -i <dir>:  Directory where expected value files exist
-  -h <path>: Path to hubscr.pl
 ";
 
 my $outdir;
