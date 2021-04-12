@@ -10,10 +10,9 @@ install(FILES ctmValidator.pl TYPE BIN)
 
 if (TESTING_CTM_VALIDATOR)
   find_package(Perl REQUIRED)
-  if (UNIX)
-    add_test(
-      NAME test_ctm_validator
-      COMMAND sh RunTest.sh ${CMAKE_CURRENT_BINARY_DIR}/ctmValidator.pl
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test_suite)
-  endif()
+  add_test(
+    NAME test_ctm_validator
+    COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/CtmValidatorTests.pl
+      -i ${CMAKE_CURRENT_SOURCE_DIR}/test_suite
+  )
 endif()

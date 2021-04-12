@@ -7,12 +7,14 @@
 #use Carp ();  local $SIG{__DIE__} = sub { Carp::cluck(); die; };
 
 use strict;
+use File::Basename;
+use Config;
 
 # File:  chfilt
-# History:  
+# History:
 #    version 1.0  Released 950921
 #    version 1.1  Released 951006
-#        - For Spanish, it now converts a set of predefined words to 
+#        - For Spanish, it now converts a set of predefined words to
 #          interjections.
 #        - Corrected the order of deleting "--" from the transcripts
 #        - Normalized improperly formatted words in (( )) markers
@@ -23,7 +25,7 @@ use strict;
 #    version 1.3 Released 960418
 #        - changed the exit codes to be 0 for successful completion, or
 #          1 otherwise,  (thanks Barb).
-#        - added English support	 
+#        - added English support
 #        - modified the main loop to first read in the entire file, then normalize
 #          it, by deleting empty lines and concatenating continued lines together.
 #        - added the -i option
@@ -42,15 +44,15 @@ use strict;
 #        - removed the -i, -u and -I flags
 #        - removed all code that made altenations with NULL
 #        - added the '-d' optionally deletable flag
-#    version 1.6 Released 
+#    version 1.6 Released
 #        - For Arabic scoring, translated the arabic script for an apostrophy to a hyphen
 #    version 1.7 Released April 7, 1998
 #        - fixed a problem with Out-of-Language markers within an unintelligible markers
 #        - fixed a problem with unintelligible markers within an OOL markers
 #        - added a filter to remove empty optionally deletable flags.
 #  Version 1.10
-#       JGF updated to new version or perl 
-#  Version 1.11 
+#       JGF updated to new version or perl
+#  Version 1.11
 #       JGF added support for Miss. State transcript
 #       JGF modified the PEM output to pass through the duration times as strings
 #  Version 1.12
@@ -63,7 +65,7 @@ use strict;
 #       JGF Added -i and -k options
 #       JGF Added code to remove 'aside' sgml tags
 #       JGF Added -p to pad segment times with silence and -s to smooth segmentations
-#       JGF Added -E to exclude overlapping speech          
+#       JGF Added -E to exclude overlapping speech
 #  Version 1.14
 #       JGF Added -c to read contractions
 #       JGF disabled all old arabic character-specific processing
@@ -81,8 +83,13 @@ use strict;
 #       JGF Added -C
 #  Version 1.18
 #       JGF Added two new hesitations
+#  Version 1.19
+#       SDR Added option to select hubscr path (would break install otherwise).
+#           Replaced non-ascii literals with hex to avoid issues with encoding
+#           this file.
 
-my $Version="1.18";
+my $Version="1.19";
+my $perl = $Config{perlpath};
 
 my $usage = "Usage: chfilt <OPTIONS> infile outfile|-- -\n".
 "Version: $Version\n".
@@ -125,13 +132,15 @@ my $usage = "Usage: chfilt <OPTIONS> infile outfile|-- -\n".
 "       -C (numbers|letters)\n".
 "                      If 'numbers', change channels A and B to 1 and 2 respectively \n".
 "                      If 'letters', change channels 1 and 2 to A and B respectively \n".
-"       -E             Exclude overlapping segments in the output STMs\n";;
+"       -E             Exclude overlapping segments in the output STMs\n".
+"       -h <path>      Path to hubscr.pl. Default is to look in the same \n".
+"                      directory as this script";;
 
-##########3  Globals 
+##########3  Globals
 my $Language;
 my $OptDel;
 my ($NewBeginTime, $NewEndTime);
-my $Format; 
+my $Format;
 my $KeepEmptyLines;
 my @Translate;
 my @Equivs;
@@ -150,10 +159,11 @@ my %TranslateAArray;
 my %EquivsAArray;
 my @Trans;
 my $ChannelsTo = "asis";
+my $HubscrPath = dirname(__FILE__)."/hubscr.pl";
 
 use Getopt::Long;
 $Getopt::Long::ignorecase = 0;
-my $ret = GetOptions ("s:f", "p:f", "l=s", "b:f", "e:f", "o=s", "t:s", "q:s", "a", "d", "m", "i", "k", "E", "c", "C=s");
+my $ret = GetOptions ("s:f", "p:f", "l=s", "b:f", "e:f", "o=s", "t:s", "q:s", "a", "d", "m", "i", "k", "E", "c", "C=s", "h=s");
 die "\n$usage\nError: Failed to parse argements" if (! $ret);
 if (defined($main::opt_o)) {
     $Format = $main::opt_o;
@@ -191,13 +201,13 @@ if (defined($main::opt_E)) { $ExcludeOverlap = $main::opt_E } else{ $ExcludeOver
 if (defined($main::opt_p)) { $PadSilence   = $main::opt_p } else{ $PadSilence = -1.0}
 if (defined($main::opt_s)) { $SmoothSegments = $main::opt_s } else{ $SmoothSegments = -1.0}
 if (defined($main::opt_c)) { $ExpandContractions = !(defined($main::opt_c))} else{ $ExpandContractions = 1}
-if (defined($main::opt_C)) { 
+if (defined($main::opt_C)) {
     die "Error: Unknown channel conversion '$main::opt_C'" if ($main::opt_C !~ /^(numbers|letters)/);
     $ChannelsTo = $main::opt_C;
 }
 $AddInterSegGap = defined($main::opt_i);
 die "$usage\nError: -i requires -b and -e to be used"
-    if (defined($main::opt_i) && (! defined($main::opt_b) || !defined($main::opt_e)));	
+    if (defined($main::opt_i) && (! defined($main::opt_b) || !defined($main::opt_e)));
 
 if (defined($main::opt_d)) {
     $OptDel       = 1;  $main::opt_d = 1;
@@ -206,12 +216,15 @@ if (defined($main::opt_d)) {
     $OptDel = 0; $main::opt_d = 0;
     $HES = "%HESITATION";
 }
+if (defined($main::opt_h)) {
+    $HubscrPath = $main::opt_h;
+}
 
 #### The main functions arguments:
 if ($#ARGV > 1) { print "\n$usage\nToo many arguments \n\n"; exit 1; }
-if ($#ARGV == 0) { print "\n$usage\nOutput Not Specified\n\n"; exit 1; } 
+if ($#ARGV == 0) { print "\n$usage\nOutput Not Specified\n\n"; exit 1; }
 if ($#ARGV == -1) { print "\n$usage\nInput and Output Not Specified\n\n";
-		    exit 1; } 
+		    exit 1; }
 
 $InFile=$ARGV[0];
 $OutFile=$ARGV[1];
@@ -226,6 +239,7 @@ if ($OutFile eq "-"){
 } else {
     $OutFile = " > ".$OutFile;
 }
+die "ERROR: 'hubscr.pl' cannot be found. Please specify with argument -h"if(! -e $HubscrPath);
 
 ($id=$InFile) =~ s:^.*/::;
 $id =~ s/\.[^\.]*$//;
@@ -261,15 +275,12 @@ if ($#Equivs >= 0){
     }
 }
 
-open(FILE,"< $InFile") || die("cannot open input Callhome file $InFile"); 
+open(FILE,"< $InFile") || die("cannot open input Callhome file $InFile");
 #binmode FILE;
 
-my $hubscr_path = "../hubscr/hubscr.pl";
-die "ERROR: 'hubscr.pl' cannot be found, please edit 'chfilt.pl line 267 and set hubscr.pl path."if(! -e $hubscr_path);
-
 #open(OUTPUT,"| sort -t \\   +0  -1  +1  -2 +3nb -4 $OutFile") ||
-open(OUTPUT,"| perl $hubscr_path sortSTM $OutFile") || 
-    die("cannot open output file $OutFile"); 
+open(OUTPUT,"| $perl $HubscrPath sortSTM $OutFile") ||
+    die("cannot open output file $OutFile");
 
 ## make a place holder for the LUR reports
 print OUTPUT ';; CATEGORY "0" "" ""'."\n";
@@ -294,7 +305,7 @@ for (my $n=0; $n<=$#Trans; $n++){
 	my $orig = $Trans[$n];
 	if ($ExpandContractions){
 	    ### Scan the transcript looking for un-annotated non-possessive contractions
-	    my $ct = $Trans[$n];	    
+	    my $ct = $Trans[$n];
 	    ### delete all tokens annotated as contractions
 	    $ct =~ s/(<contraction\s+e_form=\"([^\"]+)\">([^ \t\n\r\f\)]+))//gi;
 	    foreach my $ctt(split(/[\s\,\.\?]+/,$ct)){
@@ -313,7 +324,7 @@ for (my $n=0; $n<=$#Trans; $n++){
 		$Trans[$n] =~ s/$tag/$exp/;
 	    } else {
 		$Trans[$n] =~ s/$tag/$token/;
-	    }	    
+	    }
 	    die "Error: unable to expand the contraction\n" if ($orig eq $Trans[$n]);
 	    $orig = $Trans[$n];
 	}
@@ -328,13 +339,13 @@ for (my $n=0; $n<=$#Trans; $n++){
 	splice(@Trans,$n,1);
 	$n--;
     }
-}   
+}
 
 #print @Trans;
 
 my @STMS = ();
 
-### Normalize the text 
+### Normalize the text
 foreach $_ (@Trans){
     #match the lines header
     chomp;
@@ -350,9 +361,9 @@ foreach $_ (@Trans){
     if ($OptDel == 0){
         s:<foreign\s+language=[^>]+>([^><]+)</foreign>:$1:gi;
     } else {
-        s/\(\(\s*<foreign\s+language=\"[^"]+\">([^><]+)<\/foreign>\s*\)\)/\(\($1\)\)/gi; 
+        s/\(\(\s*<foreign\s+language=\"[^"]+\">([^><]+)<\/foreign>\s*\)\)/\(\($1\)\)/gi;
         s/<foreign\s+language=\"[^"]+\">([^><]+)<\/foreign>/\(\($1\)\)/gi;
-   } 
+   }
 #print "$_ here\n";
     if ($Language ne "arabic") {
        tr/a-z/A-Z/;                #Upper-Case all letters
@@ -363,7 +374,7 @@ foreach $_ (@Trans){
     s/\{[^{}]*\}//g;               #remove non-speech vocal noises         '{words}'
 
     ### LANGUAGE Specific Normalizations
-    if ($Language eq "arabic") { 
+    if ($Language eq "arabic") {
 	my $hes;
 	if ($OptDel == 0){
 	    $hes="%\330\252\330\261\330\257\331\221\330\257";
@@ -376,7 +387,7 @@ foreach $_ (@Trans){
         s/[% ]\330\243\331\210\331\210 /$hes /g;   ## >ww
         s/[% ]\331\207\330\247\331\212 /$hes /g;   ## hAy
         s/[% ]\331\205\331\207\331\205 /$hes /g;   ## mhm
-     
+
         s/%*(\330\243\331\207\331\207) /$1 /g;         ## Back Channel
         s/%\330\243\330\254\331\206\330\250\331\212 / /g;     ##  Foreign lexeme
         s/%\330\252\330\257\330\247\330\256\331\204.*%\330\252\330\257\330\247\330\256\331\204\\ / /g;   ## End cross channel
@@ -400,7 +411,7 @@ foreach $_ (@Trans){
 #        s/\s\254/ -/g;
 #	## Arabic Semi colon
 #	s/\s\273/ /g;
-    } elsif ($Language eq "english") { 
+    } elsif ($Language eq "english") {
 	;
     } elsif ($Language eq "japanese") {
 	$_ = &add_spaces_for_japanese_punctuation($_);
@@ -413,7 +424,7 @@ foreach $_ (@Trans){
 	s/\241\327 / /g;           # Change the Japanese quotation mark
 	s/ \241\326/ /g;           # Change the Japanese quotation mark
 	s/\241\343([\000-\177])/<$1/g;      # Change the Japanese '<'
-	s/([\000-\177])\241\344/$1>/g;      # Change the Japanese '>'	 
+	s/([\000-\177])\241\344/$1>/g;      # Change the Japanese '>'
 	# Convert Japanese col and dia flags to alternations
 	s/@([^@\[\]]+)\[\[([^,\[\]]+)\s*,[^\[\]]+\]\]/ { $1 \/ $2 } /g;
     } elsif ($Language eq "mandarin") {
@@ -444,7 +455,7 @@ foreach $_ (@Trans){
             s/~(\S) /$1 /;
             s/~(\S\'[sS]) /$1 /;       # Deal with a possessive acronym
             s/~(\S)(\S)/$1 ~$2/;
-        } 
+        }
     }
 
     s/\(\(\s*\)\)//g;              #remove unintelligable speech with no words
@@ -502,7 +513,7 @@ foreach $_ (@Trans){
 	    # remove empty unintellegible markers
 	    s/\(\(\s*\)\)//g;
             $iteration ++;
-	
+
 	    if ($_ eq $loop_end){
 	         print STDERR "Warning: unable to fully alternate an unitelligible marker\n".
 	                      "         $_\n";
@@ -597,18 +608,18 @@ foreach $_ (@Trans){
                                      # in correct orthography)
          s/\*\*//g;		     #words marked with "**" (as neologisms
                                      # or unknown 'words')
-        
+
         s:%::g; # remove all hesitation markers (maybe illegal ones!)
         # insert all hesitation markers (maybe missed ones!)
 
-        s/ ÄH / $HES /g;
+        s/ \xc4H / $HES /g;
         s/ MM / $HES /g;
-        s/ ÄHM / $HES /g;
+        s/ \xc4HM / $HES /g;
         s/ HM / $HES /g;
         s/ HA / $HES /g;
         s/ EI / $HES /g;
         s/ UH / $HES /g;
-        s/ HÄ / $HES /g;
+        s/ H\xc4 / $HES /g;
         s/ HO / $HES /g;
         s/ UFF / $HES /g;
         s/ OI / $HES /g;
@@ -694,13 +705,15 @@ foreach $_ (@Trans){
          # NOTE: Cannot remove all hesitation markers because some "%" are used
          #       in the text (I think)
          #       So we will just filter the known hesitation markers.
-         s/\sÚÀ\s/ $HES /g;
-         s/\sßÀ\s/ $HES /g;
-         s/\sàÅ\s/ $HES /g;
-         s/\sßí\s/ $HES /g;
-         s/\sºÇ\s/ $HES /g;
-     }	
-	
+         # FIXME(sdrobert): use base 10 (I think) instead of hex, like the
+         # rest of this file
+         s/\s\xda\xc0\s/ $HES /g;
+         s/\s\xdf\xc0\s/ $HES /g;
+         s/\s\xe0\xc5\s/ $HES /g;
+         s/\s\xdf\xed\s/ $HES /g;
+         s/\s\xba\xc7\s/ $HES /g;
+     }
+
      # JAPANESE
      if ($Language eq "japanese") {
          s/\+//g;		    #remove non-standard representation marker
@@ -728,18 +741,18 @@ foreach $_ (@Trans){
 
      # This has to be done AFTER ALL THE PROCEEDING STEPS to alternate any fragment words
      if ($OptDel){
-         s/(\S+)-(\S+)[-=]\s/ $1 \($2-\) /g;  #put in alternates for fragments    
-         s/(\S*)[-=]\s/ \($1-\) /g;  #put in alternates for fragments    
-         s/\s[-=](\S*)/ \(-$1\) /g;  #put in alternates for fragments    
+         s/(\S+)-(\S+)[-=]\s/ $1 \($2-\) /g;  #put in alternates for fragments
+         s/(\S*)[-=]\s/ \($1-\) /g;  #put in alternates for fragments
+         s/\s[-=](\S*)/ \(-$1\) /g;  #put in alternates for fragments
      } else {
-         s/(\S*)[-=]\s/ $1- /g;  #put in alternates for fragments    
-         s/\s[-=](\S*)/ -$1 /g;  #put in alternates for fragments    
+         s/(\S*)[-=]\s/ $1- /g;  #put in alternates for fragments
+         s/\s[-=](\S*)/ -$1 /g;  #put in alternates for fragments
      }
      s/ +/ /g;
-     if ($#Translate >= 0){	
+     if ($#Translate >= 0){
 	$_ = &Map_AArray($_,\%TranslateAArray);
-     }	
-     if ($#Equivs >= 0){	
+     }
+     if ($#Equivs >= 0){
 	$_ = &Map_AArray($_,\%EquivsAArray);
      }
      if ($AltHyphens) {
@@ -754,9 +767,9 @@ foreach $_ (@Trans){
      ($chan = $spkr) =~ s/[0-9]$//;
      if (&in_range($bt, $et) && ($KeepEmptyLines || $_ !~ /^\s*$/)){
          if ($Format eq "stm"){
-	     push @STMS, sprintf "%s %s %s %s %6.2f <O> %s\n",$id,makeChannel($chan),$id."_".$spkr,$bt,$et,$_; 
+	     push @STMS, sprintf "%s %s %s %s %6.2f <O> %s\n",$id,makeChannel($chan),$id."_".$spkr,$bt,$et,$_;
          } elsif ($Format eq "pem"){
-	     printf OUTPUT "%s %s %s %s %s\n",$id,makeChannel($chan),"unknown_speaker",$bt,$et; 
+	     printf OUTPUT "%s %s %s %s %s\n",$id,makeChannel($chan),"unknown_speaker",$bt,$et;
          }
      }
 }
@@ -809,10 +822,10 @@ if ($Format eq "stm"){
 #		    print "fix $nt $STMS[$lastStmEndIndex{$chan}] ";
                     die "Can't fix silence pad time of previous line" unless ($STMS[$lastStmEndIndex{$chan}] =~ s/^(\S+\s+\S+\s+\S+\s+\S+\s+)\S+/$1$nt/);
 #		    print "->  $STMS[$lastStmEndIndex{$chan}]\n";
-                } 
+                }
                 $nt = sprintf("%.2f",$bt - $shift);
                 die "Can't fix silence pad time" unless ($STMS[$i] =~ s/^(\S+\s+\S+\s+\S+\s+)\S+/$1$nt/);
-            } 
+            }
             $lastStmEnd{$chan} = $et;
        	    $lastStmEndIndex{$chan} = $i;
 #            print "     \$lastStmEnd{$chan} = $et\n";
@@ -831,7 +844,7 @@ if ($Format eq "stm"){
     undef %lastStmEnd;
     undef %lastStmEndId;
 
-    ## Smooth the segments 
+    ## Smooth the segments
     if ($SmoothSegments >= 0){
         for (my $i=0; $i<@STMS; $i++){
             my ($id, $chan, $spkr, $bt, $et, $lur, $text) = split(/\s+/,$STMS[$i],7);
@@ -846,13 +859,13 @@ if ($Format eq "stm"){
 		if ($id eq $lid && $chan eq $lchan && $spkr eq $lspkr && $lur eq $llur){
 		    chomp $ltext;
 		    chomp $text;
-		    $STMS[$lastStmEndIndex{$chan}] = 
+		    $STMS[$lastStmEndIndex{$chan}] =
 			"$id $chan $spkr $lbt $et $lur $ltext $text\n";
 		    splice (@STMS, $i, 1);
 		    $i --;
 		    $change = 1;
 		}
-            } 
+            }
 	    $lastStmEnd{$chan} = $et;
 	    if (! $change){
 		$lastStmEndIndex{$chan} = $i;
@@ -862,7 +875,7 @@ if ($Format eq "stm"){
     undef %lastStmEnd;
     undef %lastStmEndId;
 
-    ## Smooth the segments 
+    ## Smooth the segments
     if ($ExcludeOverlap){
         for (my $i=0; $i<@STMS; $i++){
 #            print "STM[$i] = $STMS[$i]";
@@ -877,13 +890,13 @@ if ($Format eq "stm"){
 		my ($lid, $lchan, $lspkr, $lbt, $let, $llur, $ltext) = split(/\s+/,$STMS[$lastStmEndIndex{$chan}],7);
 		if ($id eq $lid && $chan eq $lchan){
 		    chomp $ltext;
-		    $STMS[$lastStmEndIndex{$chan}] = 
+		    $STMS[$lastStmEndIndex{$chan}] =
 			"$id $chan excluded_region $lbt $et $lur ignore_time_segment_in_scoring\n";
 		    splice (@STMS, $i, 1);
 		    $i --;
 		    $change = 1;
 		}
-            } 
+            }
 	    $lastStmEnd{$chan} = $et;
 	    if (! $change){
 		$lastStmEndIndex{$chan} = $i;
@@ -915,7 +928,7 @@ if ($Format eq "stm"){
              if ($lastStmEnd{$chan} < $NewEndTime - 0.01){
                  push(@STMS, sprintf("%s %s %s %s %6.2f <O> %s\n",$lastStmEndId{$chan},$chan,
                    "${id}_${chan}_inter_segment_gap",
-                    $lastStmEnd{$chan},$NewEndTime,"")); 
+                    $lastStmEnd{$chan},$NewEndTime,""));
              }
          }
     }
@@ -930,9 +943,9 @@ exit 0;
 ####                                                                       ####
 ###############################################################################
 
- 
+
 ####
-####  Return true if the passed in begin and end times are within the 
+####  Return true if the passed in begin and end times are within the
 ####  specified range of output times.  If not return false.
 ####  Inputs:   - Argument 0: The begin time
 ####            - Argument 1: The end time
@@ -947,14 +960,14 @@ sub in_range{
     my $do_prnt = 0;
     if (defined($NewBeginTime) && defined($NewEndTime)) {
 	if (($bt >= $NewBeginTime || &eqdelta($bt,$NewBeginTime,0.5)) &&
-	    ($et <= $NewEndTime || &eqdelta($et,$NewEndTime,0.5))) {  
+	    ($et <= $NewEndTime || &eqdelta($et,$NewEndTime,0.5))) {
 	    $do_prnt = 1;
 	}
     } elsif (defined($NewBeginTime)) {
 	if ($bt >= $NewBeginTime ||
 	    &eqdelta($bt,$NewBeginTime,0.5)) {
 	    $do_prnt = 1;
-	} 
+	}
     } elsif (defined($NewEndTime)) {
 	if ($et <= $NewEndTime || &eqdelta($et,$NewEndTime,0.5)) {
 	    $do_prnt = 1;
@@ -989,7 +1002,7 @@ sub add_spaces_for_japanese_punctuation {
     my $c1 = "";
     my $lc = "";
     my $out = "";
-    
+
     while (length($_) > 0){
 	s/^(.)//;
 	$c1 = $1;
@@ -1033,7 +1046,7 @@ sub AlternateHyphenWords{
 	    ($x=$word) =~ s/[_-]//g;
 	    ($y=$word) =~ s/[_-]/ /g;
 	    ($z=$word) =~ s/[_-]/-/g;
-	    $word = "{ ".$y." / ".$x." / ".$z." }"; 
+	    $word = "{ ".$y." / ".$x." / ".$z." }";
 	}
 	$out .= " ".$word;
     }

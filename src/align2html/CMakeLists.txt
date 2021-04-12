@@ -6,7 +6,7 @@ find_package(Perl REQUIRED)
 # the target jams
 
 add_custom_target(
-  align2html
+  align2html ALL
   COMMAND ${PERL_EXECUTABLE} buildInstallVersion.pl > ${CMAKE_CURRENT_BINARY_DIR}/align2html.pl
   BYPRODUCTS align2html.pl
   SOURCES align2html-main.pl buildInstallVersion.pl
