@@ -23,7 +23,7 @@ check_library_exists(m pow "" HAVE_LIBM)
 
 # we separate main.cpp from the rest so that we can link the rest to the
 # testing stuff
-add_library(libasclite
+add_library(asclite-core
   lzma/Alloc.c lzma/LzFind.c lzma/LzmaDec.c lzma/LzmaEnc.c lzma/LzmaLib.c
   alignedsegment.cpp alignedsegmentiterator.cpp alignedspeech.cpp
   alignedspeechiterator.cpp aligner.cpp alignment.cpp arraylevenshteinmatrix.cpp
@@ -39,50 +39,50 @@ add_library(libasclite
   timedobject.cpp token.cpp tokenalignment.cpp trn_inputparser.cpp
   trntrn_segmentor.cpp uemfilter.cpp
 )
-target_include_directories(libasclite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(asclite-core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (HAVE_SYS_TYPES_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_SYS_TYPES_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_SYS_TYPES_H)
 endif()
 if (HAVE_SYS_STAT_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_SYS_STAT_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_SYS_STAT_H)
 endif()
 if (HAVE_STDLIB_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_STDLIB_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_STDLIB_H)
 endif()
 if (HAVE_STDDEF_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_STDDEF_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_STDDEF_H)
 endif()
 if (HAVE_STDC_HEADERS)
-  target_compile_definitions(libasclite PUBLIC HAVE_STDC_HEADERS)
+  target_compile_definitions(asclite-core PUBLIC HAVE_STDC_HEADERS)
 endif()
 if (HAVE_STRING_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_STRING_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_STRING_H)
 endif()
 if (HAVE_MEMORY_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_MEMORY_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_MEMORY_H)
 endif()
 if (HAVE_STRINGS_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_STRINGS_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_STRINGS_H)
 endif()
 if (HAVE_INTTYPES_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_INTTYPES_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_INTTYPES_H)
 endif()
 if (HAVE_STDINT_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_STDINT_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_STDINT_H)
 endif()
 if (HAVE_UNISTD_H)
-  target_compile_definitions(libasclite PUBLIC HAVE_UNISTD_H)
+  target_compile_definitions(asclite-core PUBLIC HAVE_UNISTD_H)
 endif()
 if (HAVE_LIBM)
-  target_link_libraries(libasclite PUBLIC m)
+  target_link_libraries(asclite-core PUBLIC m)
 endif()
 
 add_executable(asclite main.cpp)
-target_link_libraries(asclite PUBLIC libasclite)
+target_link_libraries(asclite PUBLIC asclite-core)
 
 install(
-  TARGETS libasclite asclite
+  TARGETS asclite-core asclite
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

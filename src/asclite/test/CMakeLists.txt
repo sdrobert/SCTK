@@ -11,7 +11,7 @@ add_executable(asclite_test
   test_stm_inputparser.cpp test_token.cpp test_trn_inputparser.cpp
   test_trntrn_segmentor.cpp test_unit.cpp tokenalignment_test.cpp
 )
-target_link_libraries(asclite_test PUBLIC libasclite)
+target_link_libraries(asclite_test PUBLIC asclite-core)
 target_include_directories(asclite_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_test(NAME test_asclite COMMAND $<TARGET_FILE:asclite_test> -d ${CMAKE_CURRENT_SOURCE_DIR}/../testfiles)
