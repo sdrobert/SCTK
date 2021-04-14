@@ -6,6 +6,7 @@ option(TESTING_RFILTER1 "Whether to test rfilter1" ON)
 # added to the end of rfilter1.c via #include directives. Uggh.
 
 add_executable(rfilter1 rfilter1.c)
+# set_target_properties(rfilter1 PROPERTIES SUFFIX "")
 target_include_directories(rfilter1 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(

@@ -79,6 +79,7 @@ if (HAVE_LIBM)
 endif()
 
 add_executable(asclite main.cpp)
+# set_target_properties(asclite PROPERTIES SUFFIX "")
 target_link_libraries(asclite PUBLIC asclite-core)
 
 install(

@@ -41,13 +41,11 @@ $scliteCom = File::Spec->canonpath($scliteCom);
 $ascliteCom = File::Spec->canonpath($ascliteCom);
 
 my $perl_pipe;
-my $nul;
+my $nul = File::Spec->devnull();
 if ("$^O" =~ /Win/) {
     $perl_pipe = 'perl -pe "s/(creation_date="")[^\""]+/$1/"';
-    $nul = "nul"
 } else {
     $perl_pipe = "perl -pe 's/(creation_date=\")[^\"]+/\$1/'";
-    $nul = "/dev/null"
 }
 
 sub check_result {

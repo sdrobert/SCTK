@@ -18,6 +18,7 @@ if (NOT NSGMLS)
       "Neither the nsgnmls nor onsgmls executable was found.\
       FORCE_UTF_FILT is true so we will continue, but you'll likely run \
       into errors if you try to run utf_filt.pl later.")
+    set(NSGMLS "nsgmls")  # stop bugging us on successive builds
   else()
     message(
       FATAL_ERROR
@@ -48,6 +49,7 @@ else()
       FORCE_UTF_FILT is true so we will continue, but you'll likely run \
       into errors if you try to run utf_filt.pl later."
     )
+    set(SGMLS_PATH "sgmls")
   else()
     message(
       FATAL_ERROR

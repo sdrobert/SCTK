@@ -38,9 +38,9 @@ sub runIt{
     if ($op ne "setTests"){
 	print "      Comparing output\n";
 	my $diffoption = "";
-			
+
 	if($options eq "-a") { $diffoption = "-i"; }
-			
+
 	my $diffCom = "diff -i -x CVS -x .DS_Store -x log -x \*lur -I '[cC]reation[ _]date' -I 'md-eval' -r $outDir $baseDir";
 	open (DIFF, "$diffCom |") || &error_quit("Diff command '$diffCom' Failed");
 	my @diff = <DIFF>;
@@ -56,16 +56,16 @@ runIt($operation, "test1-sastt", "-G -f rttm -F rttm -a", "../test_suite/example
 runIt($operation, "test2-sastt", "-G -f rttm -F rttm -a", "../test_suite/example.glm", "sastt", "english",
       "../test_suite/sastt-case2.ref.rttm", "../test_suite/sastt-case2.sys.rttm");
 runIt($operation, "test1-notag", "", "../test_suite/example.glm", "hub5", "english",
-      "../test_suite/lvc_refe.notag.noat.stm", 
+      "../test_suite/lvc_refe.notag.noat.stm",
       "../test_suite/lvc_hyp.notag.ctm ../test_suite/lvc_hyp2.notag.ctm");
 runIt($operation, "test1-notag-a", "-a", "../test_suite/example.glm", "hub5", "english",
-      "../test_suite/lvc_refe.notag.noat.stm", 
+      "../test_suite/lvc_refe.notag.noat.stm",
       "../test_suite/lvc_hyp.notag.ctm ../test_suite/lvc_hyp2.notag.ctm");
 runIt($operation, "test1", "-V", "../test_suite/example.glm", "hub5", "english",
-      "../test_suite/lvc_refe.stm", 
+      "../test_suite/lvc_refe.stm",
       "../test_suite/lvc_hyp.ctm ../test_suite/lvc_hyp2.ctm");
 runIt($operation, "testArb", "-V -H -T -d", "../test_suite/test.arb2004.glm", "hub5", "arabic",
-      "../test_suite/test.arb2004.txt.stm", 
+      "../test_suite/test.arb2004.txt.stm",
       "../test_suite/test.arb2004.txt.ctm");
 
 &ok_quit();

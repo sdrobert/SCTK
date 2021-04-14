@@ -49,6 +49,13 @@ target_link_libraries(sc_stats PUBLIC sclite-core)
 add_executable(rover rover.c)
 target_link_libraries(rover PUBLIC sclite-core)
 
+# set_target_properties(
+#   sclite sclite_tolower sc_stats rover
+#   PROPERTIES
+#     SUFFIX ""
+# )
+
+
 install(
   TARGETS sclite-core sclite sclite_tolower sc_stats rover
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
