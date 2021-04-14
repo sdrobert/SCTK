@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -22,7 +22,7 @@ TokenAlignmentTest::TokenAlignmentTest() {
 	speech = new Speech(speechSet);
 	segment = Segment::CreateWithDuration(0, 0, speech);
 	m_ref = Token::CreateWithDuration(0, 0, segment, "dog");
-	m_hyp1 = Token::CreateWithDuration(0, 0, segment, "dog1");	
+	m_hyp1 = Token::CreateWithDuration(0, 0, segment, "dog1");
 	m_hyp2 = Token::CreateWithDuration(0, 0, segment);
 	m_hyp3 = Token::CreateWithDuration(0, 0, segment, "dog3");
 	m_tokenAlignment = new TokenAlignment(m_ref);
@@ -69,8 +69,11 @@ void TokenAlignmentTest::TestAddAlignment() {
 	string hyp1 = "hyp1";
 	assert(m_tokenAlignment->AddAlignmentFor(hyp1, m_hyp1) > 0); // insertion worked
 	assert(m_tokenAlignment->AddAlignmentFor(hyp1, m_hyp1) == 0); // already inserted should return 0
-	assert(m_tokenAlignment->GetAlignmentFor(hyp1)->Equals(new TokenAlignment::AlignmentEvaluation(m_hyp1, TokenAlignment::UNAVAILABLE))); // alignement for hyp1 
+	assert(m_tokenAlignment->GetAlignmentFor(hyp1)->Equals(new TokenAlignment::AlignmentEvaluation(m_hyp1, TokenAlignment::UNAVAILABLE))); // alignement for hyp1
+#ifndef NDEBUG
+	// only run this code when debugging
 	m_tokenAlignment->GetAlignmentFor(hyp1)->SetResult(TokenAlignment::SUBSTITUTION);
+#endif
 	// assert(m_tokenAlignment->GetAlignmentFor(NULL) == NULL); // What about NULL???
 	assert(m_tokenAlignment->GetAlignmentFor("bogus") == NULL);
 	assert(m_tokenAlignment->GetResultFor(hyp1) == TokenAlignment::SUBSTITUTION);

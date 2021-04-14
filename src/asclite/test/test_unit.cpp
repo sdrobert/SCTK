@@ -318,7 +318,7 @@ void RunBenchmark(string bench_name, int repeat)
 			d_res += timerEnd(t_res);
 		}
 
-		printf("| test %2lu | %2.3f ms |  %2.3f ms  | %2.3f ms |\n", i, d_segs/repeat, d_align/repeat, d_res/repeat);
+		printf("| test %2zu | %2.3f ms |  %2.3f ms  | %2.3f ms |\n", i, d_segs/repeat, d_align/repeat, d_res/repeat);
   }
 
 	printf("+---------+----------+------------+----------+\n");
