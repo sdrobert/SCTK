@@ -3,7 +3,7 @@
 # ALIGN2HTML
 # Author: Jerome Ajot
 #
-# This software was developed at the National Institute of Standards and Technology by 
+# This software was developed at the National Institute of Standards and Technology by
 # employees of the Federal Government in the course of their official duties. Pursuant
 # to title 17 Section 105 of the United States Code this software is not subject to
 # copyright protection and is in the public domain. ALIGN2HTML is an experimental system.
@@ -35,7 +35,7 @@ while (<EXE>){
 	} while ($_ !~ /\#\#\# End Local Modules/);
 	my $modExp = "use\\s+(".join("|",@modules).")";
 	#print "Modes = ".join(" ",@modules)." $modExp\n";
-	### Insert the modules 
+	### Insert the modules
 	foreach my $mod(@modules){
 	    open (MOD, "<$mod.pm") || die "Failed to open $mod.pm";
 	    while (<MOD>){
@@ -46,6 +46,9 @@ while (<EXE>){
 	### Reset the package
 	push @file, "package main;\n"
     } elsif ($_ =~ /die "HERE DOCUMENT NOT BUILT"/){
+				push @file, "use File::Temp;\n";
+				push @file, "use Archive::Tar;\n";
+				push @file, 'chdir $outDir or die "Could not chdir to $outDir";'."\n";
         push @file, 'my $here = "";'."\n";
         push @file, "\$here = << 'EOTAR';\n";
 	open TARPACK, "packImageTarFile" || die "Failed to open the packed Image tar file";
@@ -54,12 +57,13 @@ while (<EXE>){
 	}
 	close TARPACK;
 	push @file, pack("u", $_);
-        push @file, "EOTAR\n";
-
-	push @file, 'open UNTAR, "| (cd $outDir ; tar zxf -)" || die "Failed to UUDECODE/TAR"'.";\n";
-	push @file, 'binmode(UNTAR);'."\n";
-	push @file, 'print UNTAR unpack("u",$here);'."\n";
-	push @file, 'close UNTAR'."\n";
+	push @file, "EOTAR\n";
+	push @file, "my \$tmp = new File::Temp();\n";
+	push @file, "print \$tmp unpack('u',\$here);\n";
+	push @file, "close(\$tmp);\n";
+	push @file, "my \$tar = new Archive::Tar();\n";
+	push @file, "\$tar->read(\$tmp->filename);\n";
+	push @file, "\$tar->extract();\n";
     } else {
 	push @file, $_;
     }
