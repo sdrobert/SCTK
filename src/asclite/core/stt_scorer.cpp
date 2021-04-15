@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -14,7 +14,7 @@
  * OR IMPLIED WARRANTY AS TO ANY MATTER WHATSOEVER, INCLUDING MERCHANTABILITY,
  * OR FITNESS FOR A PARTICULAR PURPOSE.
  */
- 
+
 /**
  * STT implementation of the scoring.
  */
@@ -39,11 +39,11 @@ void STTScorer::Score(Alignment* alignment, SpeakerMatch* speakerMatch)
 	AlignedSpeech* currentSpeech;
 	AlignedSegment* currentSegment;
 	TokenAlignment* tokenAlign;
-	
+
 	string opt_case = Properties::GetProperty("align.optionally");
     bool opt_ref = false;
     bool opt_hyp = false;
-  
+
     if ("both" == opt_case  || "ref" == opt_case)
     {
         opt_ref = true;
@@ -60,24 +60,24 @@ void STTScorer::Score(Alignment* alignment, SpeakerMatch* speakerMatch)
     {
         LOG_WARN(logger, "The <align.optionally> property has an unrecognized value: '"+opt_case+"'");
     }
-	
+
 	while (allSpeeches->Current(&currentSpeech))
 	{
 		allSegments = currentSpeech->AlignedSegments();
-		
+
 		while (allSegments->Current(&currentSegment))
 		{
 			for (size_t k=0 ; k < currentSegment->GetTokenAlignmentCount() ; ++k)
 			{
 				tokenAlign = currentSegment->GetTokenAlignmentAt(k);
 				Token* ref = tokenAlign->GetReferenceToken();
-                
+
 				for (size_t i=0 ; i < alignment->GetNbOfSystems() ; ++i)
 				{
 					string hyp_key = alignment->GetSystem(i);
 					TokenAlignment::AlignmentEvaluation* ae = tokenAlign->GetAlignmentFor(hyp_key);
 					Token* hyp = ae->GetToken();
-					
+
 					if (ref == NULL)
 					{
 						if (hyp->IsOptional() && opt_hyp)
@@ -98,9 +98,9 @@ void STTScorer::Score(Alignment* alignment, SpeakerMatch* speakerMatch)
 						else
 						{
 							ae->SetResult(TokenAlignment::DELETION);
-						}            
+						}
 					}
-					else 
+					else
 					{
 						if (ref->IsEquivalentTo(hyp))
 						{
@@ -110,7 +110,7 @@ void STTScorer::Score(Alignment* alignment, SpeakerMatch* speakerMatch)
 														 hyp->GetParentSegment()->GetSpeakerId()).compare(ref->GetParentSegment()->GetSpeakerId()) == 0)
 								{
 									ae->SetResult(TokenAlignment::CORRECT);
-								} else 
+								} else
 								{
 									ae->SetResult(TokenAlignment::SPEAKERSUB);
 								}
@@ -123,44 +123,44 @@ void STTScorer::Score(Alignment* alignment, SpeakerMatch* speakerMatch)
 							ae->SetResult(TokenAlignment::SUBSTITUTION);
 						}
 					}
-					
+
 					if(logger->isAlignLogON())
 					{
 						string csvEval = ae->GetResult().GetShortName();
 						string csvHyp = ",,,,,,,,,,";
 						string csvRef = ",,,,,,,,,,";
-						
+
 						char buffer1[BUFFER_SIZE];
 						sprintf(buffer1, "%li", currentSegment->GetSegGrpID());
 						string seggrpsid = string(buffer1);
-						
+
 						string File;
 						string Channel;
-						
+
 						if(hyp)
 						{
 							csvHyp = hyp->GetCSVInformation();
 							File = hyp->GetParentSegment()->GetSource();
 							Channel = hyp->GetParentSegment()->GetChannel();
 						}
-						
+
 						if(ref)
 						{
 							csvRef = ref->GetCSVInformation();
 							File = ref->GetParentSegment()->GetSource();
 							Channel = ref->GetParentSegment()->GetChannel();
 						}
-						
+
 						LOG_ALIGN(logger, "YES," + seggrpsid + "," + File + "," + Channel + "," + csvEval + "," + csvRef + "," + csvHyp);
 					}
 				}
 			}
 		}
-		
+
 		if(allSegments)
 			delete allSegments;
 	}
-	
+
 	if(allSpeeches)
 		delete allSpeeches;
 }

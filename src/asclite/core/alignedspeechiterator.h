@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -29,7 +29,7 @@ private:
 public:
 	AlignedSpeechIterator(Alignment* alignment);
 	~AlignedSpeechIterator() {};
-	bool Current(AlignedSpeech** current); 
+	bool Current(AlignedSpeech** current);
 };
 
 #endif

@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -18,7 +18,7 @@
 /**
  * Implementation of an Aligner with the Levenshtein algorithm
  */
- 
+
 #include "levenshtein.h" // class's header file
 
 Logger* Levenshtein::logger = Logger::getLogger();
@@ -26,7 +26,8 @@ Logger* Levenshtein::logger = Logger::getLogger();
 // class constructor
 Levenshtein::Levenshtein()
 {
-   graph = NULL;
+    refSepIndex = 0;
+    graph = NULL;
 }
 
 // class destructor
@@ -68,7 +69,7 @@ void Levenshtein::SetSegments(SegmentsGroup* segmentsGroup, SpeakerMatch* pSpeak
     }
 
 	int typecost = atoi(Properties::GetProperty("align.typecost").c_str());
-	
+
 	if(typecost == 2)
 	{
 		LOG_DEBUG(logger, "Using Time base cost model");

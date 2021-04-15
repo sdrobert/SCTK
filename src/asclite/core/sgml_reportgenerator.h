@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -45,43 +45,43 @@ class Speaker
 			name = _name;
 			sequence = seq;
 		};
-		
+
 		~Speaker()
 		{
 			segments.clear();
 		};
-		
+
 		void SortSegments()
 		{
 			sort(segments.begin(), segments.end(), AlignedSegmentSequenceComparator());
 		};
-		
+
 		vector < AlignedSegment* > GetSegments() const
 		{
 			return segments;
 		};
-		
+
 		void AddSegment(AlignedSegment* segment)
 		{
 			int seq = segment->GetReferenceSegment()->GetSourceElementNum();
 			if(seq < sequence) sequence = seq;
 			segments.push_back(segment);
 		};
-		
+
 		string GetName()
 		{
 			return name;
 		};
-		
+
 		int GetSequence()
 		{
 			return sequence;
 		};
-		
+
 	private:
 		int sequence;
 		string name;
-		vector< AlignedSegment* > segments; 
+		vector< AlignedSegment* > segments;
 };
 
 /** Predicate on Speaker: determines if the passed Speaker has the given name */
@@ -92,21 +92,21 @@ class SpeakerNamePredicate
 		{
 			wantedName = _wantedName;
 		};
-		
+
 		~SpeakerNamePredicate()
 		{
 		};
-		
+
 		void SetWantedName(const string& name)
 		{
 			wantedName = name;
 		};
-		
+
 		inline bool operator() (Speaker* speaker)
 		{
 			return wantedName == speaker->GetName();
 		}
-		
+
 	private:
 		string wantedName;
 };
@@ -132,31 +132,35 @@ class SGMLReportGenerator : public ReportGenerator
 		bool m_bRefHasConf;
 		bool m_bHypHasConf;
 		bool m_bHypHasTimes;
-		
+
 		static Logger* m_pLogger;
 	public:
 		/** class constructor */
-		SGMLReportGenerator() {}
+		SGMLReportGenerator() : m_bCaseSensitive(false),
+														m_bRefHasTimes(false),
+														m_bRefHasConf(false),
+														m_bHypHasConf(false),
+														m_bHypHasTimes(false) {}
 		/** class destructor */
 		virtual ~SGMLReportGenerator() {}
 		/** Generate the SGML report */
         void Generate(Alignment* alignment, int where);
 		/** Generate the SGML report by system */
         void GenerateSystem(Alignment* alignment, const string& systm, ostream& output);
-	
+
 	private:
 		void GenerateCategoryLabel(SpeechSet* speechSet, ostream& output);
-	
+
 		void GenerateSpeaker(Speaker* speaker, const string& systm, ostream& output);
-	
+
 		void GeneratePath(AlignedSegment* alignedSegment, const string& systm, ostream& output);
-	
+
         void GenerateTokenAlignment(TokenAlignment* tokenAlign, const string& systm, ostream& output);
-		
+
 		void HandleWordAux(ostream& output);
-		
+
 		void PreProcessWordAux(Speaker* speaker, const string& systm);
-		
+
 		void OutputTextFor(Token* token, ostream& output);
 };
 

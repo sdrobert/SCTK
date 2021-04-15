@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -14,7 +14,7 @@
  * OR IMPLIED WARRANTY AS TO ANY MATTER WHATSOEVER, INCLUDING MERCHANTABILITY,
  * OR FITNESS FOR A PARTICULAR PURPOSE.
  */
- 
+
 #ifndef GRAPHALIGNEDTOKEN_H
 #define GRAPHALIGNEDTOKEN_H
 
@@ -29,15 +29,15 @@ class GraphAlignedToken
 		size_t m_Dimension;
 		/** Array of pointers to tokens */
 		Token** m_TabAlignedTokens;
-		
+
 	public:
 		/** Constructor */
-		GraphAlignedToken() {}
+		GraphAlignedToken() : m_Dimension(0) {}
 		/** Constructor with the number of dimension */
 		GraphAlignedToken(const size_t& _dimension);
 		/** Destructor */
 		~GraphAlignedToken();
-	
+
 		/** Set the pointer of a token */
 		void SetToken(const size_t& dim, Token* token);
 		/** Returns the pointer of a token */

@@ -176,6 +176,13 @@ my $Usage="hubscr.pl [ -p PATH -H -T -d -R -v -L LEX ] [ -M LM | -w WWL ] [ -o n
     my $asclite_blocksize = 256;
 
     my $validateInputs = 1;
+
+    my $cat;
+    if ("$^O" =~ /win/) {
+        $cat = "type";
+    } else {
+        $cat = "cat";
+    }
 #######         End of Globals         #########
 ################################################
 
@@ -525,32 +532,33 @@ sub FilterFile
     my($acomp_com);
     my($sort_com);
     my($com);
+    my $hubscr = File::Spec->canonpath($0);
 
     $outfile = File::Spec->canonpath($outfile);
     $file = File::Spec->canonpath($file);
 
     print "   Filtering $lang file '$file', $format format\n";
 
-    my $rtFilt = "cat";
+    my $rtFilt = "";
 
     if ($Hub eq "rt-stt" && $format eq "ctm")
     {
         if ("$^O" =~ /win/) {
-            $rtFilt = "perl -nae \"if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\"\" \"\" ,\@F).\"\"\\n\"\" }}\" ";
+            $rtFilt = "| perl -nae \"if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\"\" \"\" ,\@F).\"\"\\n\"\" }}\" ";
         } else {
-            $rtFilt = "perl -nae 'if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\" \" ,\@F).\"\\n\" }}' ";
+            $rtFilt = "| perl -nae 'if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\" \" ,\@F).\"\\n\" }}' ";
         }
 	}
 
     if ($format eq "ctm")
     {
-	$sort_com = "$0 sortCTM < ";
+	$sort_com = "$hubscr sortCTM < ";
 	#$sort_com = "cat";
 	#$sort_com = "sort +0 -1 +1 -2 +2nb -3";
     }
     elsif ($format eq "stm")
     {
-	$sort_com = "$0 sortSTM < ";
+	$sort_com = "$hubscr sortSTM < ";
     }
     elsif ($format eq "rttm")
     {
@@ -561,44 +569,44 @@ sub FilterFile
     {
 	$csrfilt_com = "$CSRFILT -s -i $format -t $purpose -dh $GLM";
 	if ($DEF_ART_ENABLED){
-            $def_art_com = "$DEF_ART -s $LDCLEX -i $format - -";
+            $def_art_com = "| $DEF_ART -s $LDCLEX -i $format - -";
 	} else {
-            $def_art_com = "cat";
+            $def_art_com = "";
 	}
 	if ($HAMZA_NORM_ENABLED){
-            $hamza_norm_com = "$HAMZA_NORM -i $format -- - -";
+            $hamza_norm_com = "| $HAMZA_NORM -i $format -- - -";
 	} else {
-            $hamza_norm_com = "cat";
+            $hamza_norm_com = "";
 	}
 	if ($TANWEEN_FILT_ENABLED){
-            $tanween_filter_com = "$TANWEEN_FILTER -a -i $format -- - -";
+            $tanween_filter_com = "| $TANWEEN_FILTER -a -i $format -- - -";
 	} else {
-	    $tanween_filter_com = "cat";
+	    $tanween_filter_com = "";
 	}
-	$com = "$sort_com $file | $rtFilt | $def_art_com | $hamza_norm_com | $tanween_filter_com | $csrfilt_com > $outfile";
+	$com = "$sort_com $file $rtFilt $def_art_com $hamza_norm_com $tanween_filter_com | $csrfilt_com > $outfile";
     } elsif ($Lang =~ /^(mandarin)$/){
 	$csrfilt_com = "$CSRFILT -i $format -t $purpose -dh $GLM";
 
-	$com = "cat $file | $rtFilt | $csrfilt_com > $outfile";
+	$com = "$cat $file $rtFilt | $csrfilt_com > $outfile";
     } elsif ($Lang =~ /^(spanish)$/){
 	$csrfilt_com = "$CSRFILT -e -i $format -t $purpose -dh $GLM";
-	$com = "$sort_com $file | $rtFilt | $csrfilt_com > $outfile";
+	$com = "$sort_com $file $rtFilt | $csrfilt_com > $outfile";
     } elsif ($Lang =~ /^(italian)$/){
 	$csrfilt_com = "$CSRFILT -s -e -i $format -t $purpose -dh $GLM";
-	$com = "$sort_com $file | $rtFilt | $csrfilt_com > $outfile";
+	$com = "$sort_com $file $rtFilt | $csrfilt_com > $outfile";
     } elsif ($Lang =~ /^(german)$/){
 	$csrfilt_com = "$CSRFILT -e -i $format -t $purpose -dh $GLM";
 	$acomp_com =   "$ACOMP -f -m 2 -l $LDCLEX -i $format - -";
 
-	$com = "$sort_com $file | $rtFilt | $csrfilt_com | $acomp_com > $outfile";
+	$com = "$sort_com $file $rtFilt | $csrfilt_com | $acomp_com > $outfile";
     } elsif ($Lang =~ /^(english)$/){
 	$csrfilt_com = "$CSRFILT -i $format -t $purpose -dh $GLM";
-	$com = "$sort_com $file | $rtFilt | $csrfilt_com > $outfile";
+	$com = "$sort_com $file $rtFilt | $csrfilt_com > $outfile";
     } else {
 	die "Undefined language: '$lang'";
     }
 
-#	    $com = "cat $file | $rtFilt > $outfile";
+#	    $com = "cat $file $rtFilt > $outfile";
     print "      Exec: $com\n" if ($Vb);
 
     $rtn = system $com;
@@ -683,7 +691,7 @@ sub RunScoring
 	    if ("$reffileformat" eq "stm" ){
 		# Convert to rttm
                 $mdevalref="$reff.rttm";
-		my $com = "cat $reff | $STM2RTTM -e rt05s > $mdevalref";
+		my $com = "$cat $reff | $STM2RTTM -e rt05s > $mdevalref";
 		$rtn = system($com);
 		die("Error: STM2RTTM failed\n      Command: $com") if ($rtn != 0);
             } else {
@@ -721,8 +729,8 @@ sub RunScoring
 	    $rtn = system($command);
 	    die("Error: ALIGN2HTML execution failed\n      Command: $command") if ($rtn != 0);
 	} else {
-	    system "rm -f $hyp_oname.aligninfo.csv";
-        }
+        unlink "$hyp_oname.aligninfo.csv";
+    }
 
 	$command = "$SCLITE -P -o dtl pra prf -C det sbhist hist $outname < $hyp_oname.sgml";
 	$rtn = system($command);
@@ -741,7 +749,8 @@ sub RunStatisticalTests
 
     print "Running Statistical Comparison Tests\n";
 
-    $command = "cat";
+
+    $command = "$cat";
     ## verify the sgml files were made, and add to the cat list;
     print "    Checking for sclite's sgml files\n" if ($Vb);
     foreach $hyp(@Hy){

@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -30,19 +30,23 @@ class LineStyleInputParser : public InputParser
 {
 	public:
 		// class constructor
-		LineStyleInputParser() {}
+		LineStyleInputParser() : m_bUseConfidence(false),
+                                 m_bUseExtended(false),
+                                 m_Confidence(0.0),
+                                 m_starttime(0),
+                                 m_endtime(0) {}
 		// class destructor
 		virtual ~LineStyleInputParser() {}
-		
+
 	protected:
     /**
      * Parse a string as a line of tokens
      * and return the corresponding Segment
-     */	
+     */
     Segment* ParseWords(const string& source, const string& channel, const string& spkr, const int& start, const int& end, Speech* speech, const string& tokens);
-    Segment* ParseWordsEx(const string& source, const string& channel, const string& spkr, const int& start, const int& end, Speech* speech, const string& tokens, const bool& hasconf, const float& confscr, bool bOptionallyDeletable); 
+    Segment* ParseWordsEx(const string& source, const string& channel, const string& spkr, const int& start, const int& end, Speech* speech, const string& tokens, const bool& hasconf, const float& confscr, bool bOptionallyDeletable);
 	SpeechSet* ExpandAlternationSpeechSet(SpeechSet *speechs);
-	
+
     private:
         class VirtualSegment
         {
@@ -67,7 +71,7 @@ class LineStyleInputParser : public InputParser
                 vector<Token*> a_endTokens;
                 bool traversable;
         };
-		
+
         VirtualSegment* ParseWords(Segment* seg, const string& tokens, bool bOptionallyDeletable);
 		vector<string> SeparateBySlash(const string& line);
         vector<string> TokeniseWords(const string& line);
@@ -75,7 +79,7 @@ class LineStyleInputParser : public InputParser
         VirtualSegment* Transition(VirtualSegment* prec_token, VirtualSegment* toks);
         string FilterSpace(string line);
         string ReplaceChar(const string& line, const string& badstr, const string& goodstr);
-        
+
         bool m_bUseConfidence;
         bool m_bUseExtended;
         float m_Confidence;

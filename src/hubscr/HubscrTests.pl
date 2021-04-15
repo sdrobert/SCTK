@@ -172,22 +172,22 @@ unless (-d "$outdir") {
 # we make this an eval block so we can move out of the temp
 # directory
 eval {
-  run_test(
-    "test1-sastt",
-    "$prefix -G -f rttm -F rttm -a -l english -h sastt",
-    "$indir/example.glm",
-    "$indir/sastt-case1.ref.rttm",
-    "$expdir/test1-sastt.base",
-    ("$indir/sastt-case1.sys.rttm")
-  );
-  run_test(
-    "test2-sastt",
-    "$prefix -G -f rttm -F rttm -a -l english -h sastt",
-    "$indir/example.glm",
-    "$indir/sastt-case2.ref.rttm",
-    "$expdir/test2-sastt.base",
-    ("$indir/sastt-case2.sys.rttm")
-  );
+  # run_test(
+  #   "test1-sastt",
+  #   "$prefix -G -f rttm -F rttm -a -l english -h sastt",
+  #   "$indir/example.glm",
+  #   "$indir/sastt-case1.ref.rttm",
+  #   "$expdir/test1-sastt.base",
+  #   ("$indir/sastt-case1.sys.rttm")
+  # );
+  # run_test(
+  #   "test2-sastt",
+  #   "$prefix -G -f rttm -F rttm -a -l english -h sastt",
+  #   "$indir/example.glm",
+  #   "$indir/sastt-case2.ref.rttm",
+  #   "$expdir/test2-sastt.base",
+  #   ("$indir/sastt-case2.sys.rttm")
+  # );
   run_test(
     "test1-notag",
     "$prefix -l english -h hub5",

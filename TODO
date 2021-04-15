@@ -1,6 +1,8 @@
 File: TODO
 ----------
-
+// FIXME(sdrobert): maps are guaranteed to have a consistent ordering, but
+// *pointers* aren't guaranteed to be allocated in some fixed order. This
+// is likely the cause of different outputs of GCC vs. MSVC.
 High Priority:
 [ ] fix utf_filt tests
 [ ] fix mdeval tests

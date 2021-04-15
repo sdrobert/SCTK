@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by 
+ * This software was developed at the National Institute of Standards and Technology by
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -32,26 +32,26 @@ class InputParser
 {
 	public:
 		// class constructor
-		InputParser() {	m_bOneTokenPerSegment = false; }
+		InputParser() : m_bOneTokenPerSegment(false) { }
 		// class destructor
 		virtual ~InputParser() { }
 		/**
-		 * Load the select file and create the 
+		 * Load the select file and create the
 		 * Speech/Segment/Token structure with it.
 		 */
 		virtual SpeechSet* loadFile(const string& name)=0;
-		
+
 		int ParseString(const string& chaine)  { return static_cast<int>(floor( ( atof(chaine.c_str()) * 1000 ) + 0.5)); }
-		
+
 		void SetOneTokenPerSegment(const bool& _bool) { m_bOneTokenPerSegment = _bool; }
 		bool isOneTokenPerSegment() { return m_bOneTokenPerSegment; }
-		
+
 	protected:
         /**
          * Build a Token with a text input
          */
         Token* BuildToken(const int& start, const int& dur, const string& text_to_parse, Segment* parent);
-		
+
 		bool m_bOneTokenPerSegment;
 };
 
