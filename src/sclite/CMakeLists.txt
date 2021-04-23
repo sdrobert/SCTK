@@ -87,8 +87,16 @@ if (SCLITE_TESTING)
       -i ${CMAKE_CURRENT_SOURCE_DIR}/testdata
       -s $<TARGET_FILE:sclite>
   )
-  if (UNIX)
-    # add_test(NAME test_sclite COMMAND sh -c "./tsclite.sh -clean; ./tsclite.sh -ed $1 && ./tsclite.sh -clean" -- ${CMAKE_CURRENT_BINARY_DIR} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testdata)
-    add_test(NAME test_sc_stats COMMAND sh -c "./tsc_stats.sh -clean; ./tsc_stats.sh -ed $1 && ./tsc_stats.sh -clean" == ${CMAKE_CURRENT_BINARY_DIR} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testdata)
-  endif (UNIX)
+
+  add_test(
+    NAME test_sc_stats
+    COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ScStatsTests.pl
+    -i ${CMAKE_CURRENT_SOURCE_DIR}/testdata
+    -s $<TARGET_FILE:sc_stats>
+  )
+
+  # if (UNIX)
+  #   add_test(NAME test_sclite COMMAND sh -c "./tsclite.sh -clean; ./tsclite.sh -ed $1 && ./tsclite.sh -clean" -- ${CMAKE_CURRENT_BINARY_DIR} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testdata)
+  #   add_test(NAME test_sc_stats COMMAND sh -c "./tsc_stats.sh -clean; ./tsc_stats.sh -ed $1 && ./tsc_stats.sh -clean" == ${CMAKE_CURRENT_BINARY_DIR} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testdata)
+  # endif (UNIX)
 endif (SCLITE_TESTING)
