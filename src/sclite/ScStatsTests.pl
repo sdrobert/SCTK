@@ -28,7 +28,7 @@ my $sc_stats = "sc_stats";
 my $scl_flags = "";
 my $perl = $Config{perlpath};
 my $cat;
-if ("$^O" =~ /win/) {
+if ("$^O" =~ /Win/) {
     $cat = "type";
 } else {
     $cat = "cat";
