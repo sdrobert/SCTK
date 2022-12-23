@@ -14,6 +14,7 @@
 # OR FITNESS FOR A PARTICULAR PURPOSE.
 
 use strict;
+use Config;
 use Getopt::Long;
 use File::Spec;
 use File::Compare qw(compare_text);
@@ -23,6 +24,7 @@ my $ascliteCom = "../core/asclite";
 my $compatOutDir = "scliteCompatTestOutDir";
 my $ascliteTestOutDir = "ascliteTestOutDir";
 my $failure = 0;
+my $perl = $Config{perlpath};
 
 ####################
 sub error_exit { exit(1); }
@@ -31,7 +33,7 @@ sub ok_exit { exit(0); }
 sub ok_quit { print(join(' ', @_), "\n"); &ok_exit(); }
 ####################
 
-my $Usage = "Usage: ascliteTest.pl -s (all|sastt|std|mdm04|mdm04ByFile|cts04|mdmVariations|passed|notpassed|todebug) [ -m ]\n";
+my $Usage = "Usage: $0 -s (all|sastt|std|mdm04|mdm04ByFile|cts04|mdmVariations|passed|notpassed|todebug) [ -m ]\n";
 my $suite = "std";
 my $bigMem = 0;
 my $result = GetOptions("s=s" => \$suite, "m" => \$bigMem, "a=s" => \$ascliteCom, "b=s" => \$scliteCom);
@@ -42,10 +44,10 @@ $ascliteCom = File::Spec->canonpath($ascliteCom);
 
 my $perl_pipe;
 my $nul = File::Spec->devnull();
-if ("$^O" =~ /Win/) {
-    $perl_pipe = 'perl -pe "s/(creation_date="")[^\""]+/$1/"';
+if ("$^O" =~ /win/i) {
+    $perl_pipe = $perl.' -pe "s/(creation_date="")[^\""]+/$1/"';
 } else {
-    $perl_pipe = "perl -pe 's/(creation_date=\")[^\"]+/\$1/'";
+    $perl_pipe = "$perl -pe 's/(creation_date=\")[^\"]+/\$1/'";
 }
 
 sub check_result {

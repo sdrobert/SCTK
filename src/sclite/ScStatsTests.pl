@@ -39,7 +39,7 @@ GetOptions(
     my ($opt_name, $opt_value) = @_;
     die "Error -$opt_name expected directory name, got $opt_value"
       unless (-d $opt_value || mkdir($opt_value));
-    $outdir = File::Spec->canonpath($opt_value);
+    $outdir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
   },
   "i=s" => sub {
     my ($opt_name, $opt_value) = @_;
@@ -51,7 +51,7 @@ GetOptions(
     my ($opt_name, $opt_value) = @_;
     die "Error -$opt_name expected existing exectuable, got $opt_value"
       unless (-x $opt_value);
-    $sc_stats = File::Spec->canonpath($opt_value);
+    $sc_stats = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
   },
 ) or die "$usage";
 

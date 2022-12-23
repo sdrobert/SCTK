@@ -86,6 +86,7 @@ if (SCLITE_TESTING)
     COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ScliteTests.pl
       -i ${CMAKE_CURRENT_SOURCE_DIR}/testdata
       -s $<TARGET_FILE:sclite>
+      -o out
   )
 
   add_test(
@@ -93,6 +94,7 @@ if (SCLITE_TESTING)
     COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ScStatsTests.pl
     -i ${CMAKE_CURRENT_SOURCE_DIR}/testdata
     -s $<TARGET_FILE:sc_stats>
+    -o out
   )
 
   # if (UNIX)

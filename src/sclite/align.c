@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include "sctk.h"
 
 #if HAVE_UNISTD_H

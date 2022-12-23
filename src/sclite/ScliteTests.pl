@@ -36,7 +36,7 @@ GetOptions(
     my ($opt_name, $opt_value) = @_;
     die "Error -$opt_name expected directory name, got $opt_value"
       unless (-d $opt_value || mkdir($opt_value));
-    $outdir = File::Spec->canonpath($opt_value);
+    $outdir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
   },
   "i=s" => sub {
     my ($opt_name, $opt_value) = @_;
@@ -48,7 +48,7 @@ GetOptions(
     my ($opt_name, $opt_value) = @_;
     die "Error -$opt_name expected existing exectuable, got $opt_value"
       unless (-x $opt_value);
-    $sclite = File::Spec->canonpath($opt_value);
+    $sclite = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
   },
   "d" => \$has_diff,
   "t" => \$has_slm,
@@ -105,6 +105,7 @@ sub compare_directories {
   closedir($dh);
   foreach my $fn (@fns) {
     next unless ($fn =~ /^$test_id\..*$/);
+    next if ($fn =~ /.*\.com$/);
     my $new_relative = join("/", $relative_path, $fn);
     die unless (-d "$exp_root/$new_relative" || compare_files($test_id, $new_relative, $exp_root, $act_root));
     die unless (-f "$exp_root/$new_relative" || compare_directories($test_id, $new_relative, $exp_root, $act_root));
@@ -149,14 +150,14 @@ sub run_test {
     " -n $name -O $act_dir".
     " 1> ".File::Spec->catfile($act_dir, "$name.out").
     " 2> ".File::Spec->catfile($act_dir, "$name.err");
-
+  
   # the 16_* series errors intentionally.
   system($cmd);
 
-  foreach my $fn("$act_dir/$name.sgml", "$act_dir/$name.nl.sgml") {
+  foreach my $fn ("$act_dir/$name.sgml", "$act_dir/$name.nl.sgml") {
     next unless (-f $fn);
     my $tf = new File::Temp();
-    open(my $fh, "<", $fn);
+    open(my $fh, "<", $fn) or die("Could not open '$fn'");
     while (<$fh>) {
       s/creation_date="[^"]*"//;
       print $tf $_;
@@ -232,6 +233,18 @@ run_test(
 );
 
 run_test(
+  "test3b",
+  "Align Segmental Time marks (STM) to Conversation time marks (CTM) with confidence scores",
+  "$prefix -r ./lvc_ref.stm stm -h ./lvc_hypc.ctm ctm -o sum"
+);
+
+run_test(
+  "test3c",
+  "Test the output generated in lur when ther is no reference data",
+  "$prefix -r ./lvc_refm.stm stm -h ./lvc_hypm.ctm ctm -o lur"
+);
+
+run_test(
   "test4",
   "Same as test 3, but using diff for alignment",
   "-$prefix r ./lvc_refe.stm stm -h ./lvc_hyp.ctm ctm -o all -d",
@@ -254,14 +267,20 @@ run_test(
 
 run_test(
   "test7",
-  "Run some test cases through",
+  "Run some test cases through w/ D flag",
   "$prefix -r ./tests.ref -h ./tests.hyp -i spu_id -o all -F -D"
 );
 
 run_test(
   "test7_r",
-  "Run some test cases through (reversing ref and hyp)",
+  "Run some test cases through (reversing ref and hyp) w/ D flag",
   "$prefix -r ./tests.hyp -h ./tests.ref -i spu_id -o all -F -D",
+);
+
+run_test(
+  "test7_noD",
+  "Run some test cases through w/o D flag",
+  "$prefix -r ./tests.ref -h ./tests.hyp -i spu_id -o all -F"
 );
 
 run_test(
@@ -358,14 +377,26 @@ run_test(
 
 run_test(
   "test13",
-  "Run alignments on two CTM files, using DP Word alignments",
+  "Run alignments on two CTM files, using DP Word alignments w/o D flag",
   "$prefix -r ./tima_ref.ctm ctm -h ./tima_hyp.ctm ctm -o all prf"
 );
 
 run_test(
+  "test13_D",
+  "Run alignments on two CTM files, using DP Word alignments w/ D flag",
+  "$prefix -r ./tima_ref.ctm ctm -h ./tima_hyp.ctm ctm -o all prf -D"
+);
+
+run_test(
   "test13_a",
-  "Run alignments on two CTM files, using Time-Mediated DP alignments",
+  "Run alignments on two CTM files, using Time-Mediated DP alignments w/o D flag",
   "$prefix -r ./tima_ref.ctm ctm -h ./tima_hyp.ctm ctm -o all -T"
+);
+
+run_test(
+  "test13_aD",
+  "Run alignments on two CTM files, using Time-Mediated DP alignments w/ D flag",
+  "$prefix -r ./tima_ref.ctm ctm -h ./tima_hyp.ctm ctm -o all -T -D"
 );
 
 run_test(
@@ -414,6 +445,12 @@ run_test(
   "test15_c",
   "UTF-8 test - UTF-8 Turckish",
   "$prefix -r ./test.turkish.ref trn -h ./test.turkish.hyp -o all prf -e utf-8 babel_turkish -i spu_id"
+);
+
+run_test(
+  "test15_d",
+  "UTF-8 test - UTF-8 Ukranian",
+  "$prefix -r ./test.ukranian.ref trn -h ./test.ukranian.hyp -o all prf -e utf-8 ukrainian -i spu_id"
 );
 
 my $n = 1;
