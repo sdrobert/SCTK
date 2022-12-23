@@ -26,7 +26,7 @@ my $indir = ".";
 my $perl = $Config{perlpath};
 my $base = getcwd();
 my $paths = $base;
-$SIG{TERM} = $SIG{TERM} = sub {chdir $base;};
+$SIG{TERM} = sub {chdir $base;};
 
 GetOptions(
   "o=s" => sub {
@@ -159,7 +159,6 @@ sub run_test {
   }
   my $rel_systems_ = join(" ", @rel_systems);
   $cmd .= " -g $rel_glm -r $rel_ref $rel_systems_ > log";
-  print STDERR "$cmd\n";
   system($cmd) == 0
     or die "$name failed: error code $?";
   compare_directories($name, ".", $exp, $act_dir) or die;
@@ -189,14 +188,14 @@ eval {
   #   "$expdir/test2-sastt.base",
   #   ("$indir/sastt-case2.sys.rttm")
   # );
-  # run_test(
-  #   "test1-notag",
-  #   "$prefix -l english -h hub5",
-  #   "$indir/example.glm",
-  #   "$indir/lvc_refe.notag.noat.stm",
-  #   "$expdir/test1-notag.base",
-  #   ("$indir/lvc_hyp.notag.ctm", "$indir/lvc_hyp2.notag.ctm")
-  # );
+  run_test(
+    "test1-notag",
+    "$prefix -l english -h hub5",
+    "$indir/example.glm",
+    "$indir/lvc_refe.notag.noat.stm",
+    "$expdir/test1-notag.base",
+    ("$indir/lvc_hyp.notag.ctm", "$indir/lvc_hyp2.notag.ctm")
+  );
   run_test(
     "test1-notag-a",
     "$prefix -l english -h hub5 -a",

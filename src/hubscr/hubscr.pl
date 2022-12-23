@@ -637,7 +637,7 @@ sub FilterFile
 	die "Undefined language: '$lang'";
     }
 
-#	    $com = "cat $file $rtFilt > $outfile";
+	    # $com = "$cat $file $rtFilt > $outfile";
     print "      Exec: $com\n" if ($Vb);
 
     $rtn = system $com;
@@ -652,7 +652,7 @@ sub FilterFile
 	if ($format eq "ctm") {
 	    $vcom = "$CTMVALID -l $Lang -i $outfile";
 	} elsif ($format eq "stm") {
-	    $vcom = "stmValidator.pl -l $Lang -i $outfile";
+	    $vcom = "$STMVALID -l $Lang -i $outfile";
 	} else {  ###if ($format eq "rttm") {
 	    $vcom = "$RTTMVALID -S -f -u -i $outfile";
 	}
