@@ -8,15 +8,15 @@
 #  Version 1-24 Debugging versions non release
 #
 #  Version 25 Released 8/14/98
-#          This version converts the output of a nsgmls to various formats.
+#          This version converts the output of a nsgmls to various formats. 
 #          These formats include:
 #          1) stm without NE tags for ASR processing,
 #          2) stm with NE tags for NE processing
-#          3) ctm with NE tags for NE processing (word time is obtained
+#          3) ctm with NE tags for NE processing (word time is obtained 
 #             from averaging number of words in a turn),
-#          4) ctm with NE tags for NE processing (word time is obtained
+#          4) ctm with NE tags for NE processing (word time is obtained 
 #             from word time tag).
-#          Several issues are still unresolved in this version:
+#          Several issues are still unresolved in this version: 
 #          1) period in Ms.
 #          2) turn end time is marked when music ends not when speaker
 #             stops talking
@@ -31,7 +31,7 @@
 #          the input to the filter is the sgml transcript not the output
 #          of the nsgmls program
 #          sgml --> filter ---> output in specified format
-#
+# 
 #  Version 28
 #          Added the -o flag to indicate if overlap is to be processed
 #          or ignored
@@ -54,9 +54,9 @@
 #  Version 33-34
 #          Added the CTM output format
 #          Modified the tokenization of stm2ctm to be more robust.
-#
+#          
 #  Version 35
-#          modified the IECTM output format to make a single token out of
+#          modified the IECTM output format to make a single token out of 
 #          all named entity tags so that sclite doesn't divide them
 #
 #  Version 36
@@ -65,7 +65,7 @@
 #          Modified the way IECTMs are made when the -w tag is not used in
 #             that overlap tags with times are used to divide turns so that
 #             the inferred word times next to overlapped regions are correct.
-#  Version 37
+#  Version 37 
 #          Fixed the handling if possessive acronyms.  The pattern match was
 #          case sensitive
 #
@@ -102,7 +102,7 @@
 #          Added the sex designation "unknown" the the LUR labels
 #
 #  Version 46
-#          Added code to usure the asr attribute stack orders the start and
+#          Added code to usure the asr attribute stack orders the start and 
 #          end times appropriately.  It's clear that codes needs rewritten.  It
 #          was done before JGF knew about hash of hashes
 #
@@ -138,10 +138,10 @@
 #         Added code to not translate non-lexemes to %hesitation.
 #         Added code to not translate non-lexemes to %hesitation.
 #
-#  Version 55
+#  Version 55          
 #         Don't lowercase the speaker and channel of a turn
 #
-#  Version 56
+#  Version 56          
 #         Added support for onsgmls
 #
 ########################################################
@@ -320,11 +320,19 @@ $translateContractions = 1;
 $translateNonlexemes = 1;
 $deleteNonspeech = 1;
 $deleteAcousticnoise = 1;
+my $NSGMLS;
 if ("@NSGMLS@" eq "NSGMLS-NOTFOUND") {
 	$NSGMLS = "nsgmls";  # hope it's there later!
 } else {
 	$NSGMLS = "@NSGMLS@";
 }
+# my $cat;
+# if ("$^O" =~ /win/i) {
+# 		$cat = "type";
+# } else {
+# 		$cat = "cat";
+# }
+
 
 ########################################################
 # include extended perl libraries
@@ -385,20 +393,20 @@ die "${USAGE}Error: Input UTF file required" if (!defined($opt_i));
 die "${USAGE}Error: SGML DTD file required" if (!defined($opt_e));
 
 die ("$USAGE") if ($display_help) ;
-die ("ERROR: use -w only with IECTM format\n")
+die ("ERROR: use -w only with IECTM format\n") 
     if ($use_wtag == 1 && $format !~ /^($CTM|$IECTM)$/);
 
 
 # open files
 #
-open(IN, "cat $dtd_file $input | $NSGMLS |") or
+open(IN, "cat $dtd_file $input | $NSGMLS |") or 
     die("Unable to open nsgmls parsed data $input");
 binmode IN;
 
 open (OUT, ">$output") or die ("Unable to open $output for writing\n");
 binmode OUT;
 
-# allocate an object of SGMLS class
+# allocate an object of SGMLS class 
 #
 $this_parse = new SGMLS(IN);
 
@@ -410,7 +418,7 @@ while ($this_event = $this_parse->next_event) {
 	if ($debug_level > $DEBUG_DETAIL) ;
 
    SWITCH: {
-
+      
       $type eq 'start_element' && do {
 	  if ($debug_level > $DEBUG_BRIEF) {
 	      print "${DBoff}start ".$data->name."\n"; ${DBoff} .= "  ";
@@ -419,7 +427,7 @@ while ($this_event = $this_parse->next_event) {
 	  if ($data->name eq "UTF"){
 	      &proc_beg_utf($data);
 	  }
-
+	  
 	  elsif ($data->name eq "BN_EPISODE_TRANS"){
 	      &proc_beg_episode($data);
 	  }
@@ -508,7 +516,7 @@ while ($this_event = $this_parse->next_event) {
 	  if ($data->name eq "UTF"){
 	      &proc_end_utf($data);
 	  }
-
+	  
 	  elsif ($data->name eq "BN_EPISODE_TRANS"){
 	      &proc_end_episode();
 	  }
@@ -598,10 +606,10 @@ while ($this_event = $this_parse->next_event) {
 	      if ($debug_level > $DEBUG_BRIEF);
 
 	  if ($incomment){
-	      ; #### Skipping Comment
+	      ; #### Skipping Comment 
 	  }
 
-	  else {
+	  else { 
 	      &proc_cdata($data);
 	  }
 
@@ -610,7 +618,7 @@ while ($this_event = $this_parse->next_event) {
 
       $type eq 're' && do {
 	  if ($incomment){
-	      ;
+	      ;  
 	  }
 
 	  last SWITCH;
@@ -645,7 +653,7 @@ exit 0;
 sub proc_beg_utf{
     local($data) = @_;
     local($key);
-
+    
     for $key ($data->attribute_names) {
 
 	if ($debug_level > $DEBUG_DETAIL) {
@@ -676,7 +684,7 @@ sub proc_beg_utf{
     $speech_level = $OFF;
     $other_level = $OFF;
 
-    # reset a variable that holds all the turns (of all the sections)
+    # reset a variable that holds all the turns (of all the sections) 
     # in an episode
     #
     @section_stack = ();
@@ -730,10 +738,10 @@ sub proc_beg_section{
     %section_attr = ();
 
     for $key ($data->attribute_names) {
-	if ($debug_level > $DEBUG_DETAIL) {
+	if ($debug_level > $DEBUG_DETAIL) {	
 	    print "${DBoff}Attribute: $key=" . (($data->attribute($key)->is_implied) ? "" : $data->attribute($key)->value) . "\n";
 	}
-
+	
 	# add the "SECTION_" in front of the original key to differentiate
 	# key in a turn
 	#
@@ -785,10 +793,10 @@ sub proc_beg_converse{
     %section_attr = ();
 
     for $key ($data->attribute_names) {
-	if ($debug_level > $DEBUG_DETAIL) {
+	if ($debug_level > $DEBUG_DETAIL) {	
 	    print "${DBoff}Attribute: $key=" . (($data->attribute($key)->is_implied) ? "" : $data->attribute($key)->value) . "\n";
 	}
-
+	
 	# add the "CONVERSATION_" in front of the original key to differentiate
 	# key in a turn
 	#
@@ -859,7 +867,7 @@ sub proc_beg_turn{
 	$turn_elems{$key} = $turn_attr{$key};
     }
     $turn_elems{$FILENAME_KEY} = $filename;
-    $turn_elems{$TURN_CHANNEL_KEY} = "1"
+    $turn_elems{$TURN_CHANNEL_KEY} = "1" 
 	if ($turn_elems{$TURN_CHANNEL_KEY} eq "");
     $turn_attr{$TURN_CHANNEL_KEY} = "1"
 	if ($turn_attr{$TURN_CHANNEL_KEY} eq "");
@@ -869,14 +877,14 @@ sub proc_beg_turn{
     if ($turn_elems{$SPKRTYPE_KEY} =~ /child/i){
 	$turn_elems{$SPKRTYPE_KEY} = "";
 	$turn_attr{$SPKRTYPE_KEY} = "";
-    }
+    }    
     $turn_elems{$FOCUS_COND_KEY} = &proc_get_focus_cond(
-                      $turn_attr{$DIALECT_KEY},
-		      $turn_attr{$FIDELITY_KEY},
-                      $turn_attr{$MODE_KEY},
-                      $bkgrnd_attr_stack{$MUSIC_KEY},
+                      $turn_attr{$DIALECT_KEY}, 
+		      $turn_attr{$FIDELITY_KEY}, 
+                      $turn_attr{$MODE_KEY}, 
+                      $bkgrnd_attr_stack{$MUSIC_KEY}, 
                       $bkgrnd_attr_stack{$SPEECH_KEY},
-                      $bkgrnd_attr_stack{$OTHER_KEY});
+                      $bkgrnd_attr_stack{$OTHER_KEY}); 
     $turn_elems{$TEXT_KEY} = "";
 
     # we are in a middle of a turn
@@ -937,24 +945,24 @@ sub proc_beg_separator{
     if ($translateContractions && ! defined($attr_stack{"CONTRACTION"})){
 	print "Warning: Possible non-annotated contraction \"$text\"\n" if ($text =~ /\w'\w+/ && $text !~ /\w's$/);
     }
-
+    
     for $key(keys %attr_stack){
 
 	if ($debug_level > $DEBUG_DETAIL) {
 	    print "$key=".$attr_stack{$key} . " ";
 	}
 
-	# do not keep nonspeech
+	# do not keep nonspeech 
 	#
-	if ($key eq "NONSPEECH") {
+	if ($key eq "NONSPEECH") {	    
 	    if ($deleteNonspeech){
-		$kept_text = 0;
+		$kept_text = 0;		
 	    } else {
 		$text = "{".$text;
 	    }
-	} elsif ($key eq "ACOUSTICNOISE") {
+	} elsif ($key eq "ACOUSTICNOISE") {	    
 	    if ($deleteAcousticnoise){
-		$kept_text = 0;
+		$kept_text = 0;		
 	    } else {
 		$text = "\[".$text;
 	    }
@@ -994,22 +1002,22 @@ sub proc_beg_separator{
 	}
     }
 
-    if ($debug_level > $DEBUG_DETAIL) {
+    if ($debug_level > $DEBUG_DETAIL) {    
         print "NE: ";
 	foreach $key(sort(keys %ne_attr_stack)){
 	    print "$key=".$ne_attr_stack{$key}." ";
 	}
-
+	
         print "ASR: ";
 	foreach $key(sort(keys %asr_attr_stack)){
 	    print "$key=".$asr_attr_stack{$key}." ";
 	}
-
+	
         print "BG: ";
 	foreach $key(sort(keys %bkgrnd_attr_stack)){
 	    print "$key=".$bkgrnd_attr_stack{$key}. " ";
 	}
-
+	
 	print "\$text=$text kept_text=$kept_text)\n";
     }
     if ($kept_text) {
@@ -1038,7 +1046,7 @@ sub proc_beg_separator{
 	}
 	push (@text_elem, $text);
     }
-
+    
     # reset the text within separator tag
     #
     $text = "";
@@ -1132,7 +1140,7 @@ sub proc_beg_frag{
 
     &proc_beg_TextAttrib($data->name);
     foreach $word(ie_split($text)) {
-
+	
 	$newtext .= ($word =~ /^<.*>$/) ? $word : "($word-)";
     }
     $text = $newtext;
@@ -1197,19 +1205,19 @@ sub proc_beg_ASR_tag{
     foreach $key($data->attribute_names){
 	next if ($key eq "STARTTIME" || $key eq "ENDTIME");
 	$asr_attr_stack{$norm_tag} .= " $key=" .
-	    ((! $data->attribute($key)->is_implied) ?
+	    ((! $data->attribute($key)->is_implied) ? 
 	     $data->attribute($key)->value : "" );
     }
     foreach $key($data->attribute_names){
 	next unless ($key eq "STARTTIME");
 	$asr_attr_stack{$norm_tag} .= " $key=" .
-	    ((! $data->attribute($key)->is_implied) ?
+	    ((! $data->attribute($key)->is_implied) ? 
 	     $data->attribute($key)->value : "" );
     }
     foreach $key($data->attribute_names){
 	next unless ($key eq "ENDTIME");
 	$asr_attr_stack{$norm_tag} .= " $key=" .
-	    ((! $data->attribute($key)->is_implied) ?
+	    ((! $data->attribute($key)->is_implied) ? 
 	     $data->attribute($key)->value : "" );
     }
     $asr_attr_stack{$norm_tag} .= ">";
@@ -1220,16 +1228,16 @@ sub proc_beg_ASR_tag{
 #    if ($process_overlap) {
     if (1) {
 
-	# if overlap or noscore, divide each into individual turn and
+	# if overlap or noscore, divide each into individual turn and 
 	# eliminate later
 	#
-	if (($norm_tag eq "OVERLAP" && $process_overlap) || $norm_tag eq "NOSCORE" ){
+	if (($norm_tag eq "OVERLAP" && $process_overlap) || $norm_tag eq "NOSCORE" ){ 
 	    local $starttime_tag;
 	    local $starttime;
 	    local $endtime_tag;
 	    local $endtime;
-
-	    if ($asr_attr_stack{$norm_tag} =~ /(STARTTIME)=(\S+)\s*(ENDTIME)=(\S+)\>/) {
+	    
+	    if ($asr_attr_stack{$norm_tag} =~ /(STARTTIME)=(\S+)\s*(ENDTIME)=(\S+)\>/) {	
 		$starttime_tag = $1;
 		$starttime = $2;
 		$endtime_tag = $3;
@@ -1237,16 +1245,16 @@ sub proc_beg_ASR_tag{
 	    } else {
 		die "Unable to process '$norm_tag' tags w/o times"
 	    }
-
+	    
 	    if ($turn_elems{$starttime_tag} != $starttime) {
 		$turn_elems{$endtime_tag} = $starttime;
-
+		
 		$turn_elems{$TEXT_KEY} = "";
-
+		
 		# see note in proc_end_turn routine
 		#
 		&proc_preproc_text (*text_elem);
-
+		
 		for ($i = 0; $i <= $#text_elem; $i++) {
 		    $turn_elems{$TEXT_KEY} .= $text_elem[$i] . " ";
 		}
@@ -1256,28 +1264,28 @@ sub proc_beg_ASR_tag{
 
 	    %turn_elems = ();
 	    @text_elem = ();
-
+	    
 	    # copy prev attribute over
 	    #
 	    for $key (keys %section_attr) {
 		$turn_elems{$key} = $section_attr{$key};
 	    }
-
+	    
 	    for $key (keys %turn_attr) {
 		$turn_elems{$key} = $turn_attr{$key};
 	    }
-
+	    
 	    $turn_elems{$starttime_tag} = $starttime;
 	    $turn_elems{$endtime_tag} = $endtime;
 	    $turn_elems{$FILENAME_KEY} = $filename;
 	    $turn_elems{$NUM_CHAN_KEY} = $num_chan;
 	    $turn_elems{$FOCUS_COND_KEY} = &proc_get_focus_cond(
-		   $turn_attr{$DIALECT_KEY},
-		   $turn_attr{$FIDELITY_KEY},
-		   $turn_attr{$MODE_KEY},
-		   $bkgrnd_attr_stack{$MUSIC_KEY},
+		   $turn_attr{$DIALECT_KEY}, 
+		   $turn_attr{$FIDELITY_KEY}, 
+		   $turn_attr{$MODE_KEY}, 
+		   $bkgrnd_attr_stack{$MUSIC_KEY}, 
 		   $bkgrnd_attr_stack{$SPEECH_KEY},
-                   $bkgrnd_attr_stack{$OTHER_KEY});
+                   $bkgrnd_attr_stack{$OTHER_KEY}); 
  	    $turn_elems{$TEXT_KEY} = "";
 	}
     } elsif ($format eq $IECTM &&
@@ -1286,13 +1294,13 @@ sub proc_beg_ASR_tag{
 	     $#text_elem >= 0) {
 	### divide the turn here so that the inferred word time work out
 	if ($asr_attr_stack{$norm_tag} =~
-	    /(STARTTIME)=(\S+)\s*(ENDTIME)=(\S+)\>/) {
+	    /(STARTTIME)=(\S+)\s*(ENDTIME)=(\S+)\>/) {	
 	    $starttime_tag = $1;
 	    $starttime = $2;
 	    $endtime_tag = $3;
 	    $endtime = $4;
 
-	    #### flush the residual data
+	    #### flush the residual data 
 	    $turn_elems{$endtime_tag} = $starttime;
 	    &proc_preproc_text (*text_elem);
 	    $turn_elems{$TEXT_KEY} .= join(" ",@text_elem) . " ";
@@ -1303,27 +1311,27 @@ sub proc_beg_ASR_tag{
 	    for $key (keys %section_attr) {
 		$turn_elems{$key} = $section_attr{$key};
 	    }
-
+	    
 	    for $key (keys %turn_attr) {
 		$turn_elems{$key} = $turn_attr{$key};
 	    }
-
+	    
 	    $turn_elems{$starttime_tag} = $starttime;
 	    $turn_elems{$endtime_tag} = $endtime;
 	    $turn_elems{$FILENAME_KEY} = $filename;
 	    $turn_elems{$NUM_CHAN_KEY} = $num_chan;
 	    $turn_elems{$FOCUS_COND_KEY} = &proc_get_focus_cond(
-		   $turn_attr{$DIALECT_KEY},
-		   $turn_attr{$FIDELITY_KEY},
-		   $turn_attr{$MODE_KEY},
-		   $bkgrnd_attr_stack{$MUSIC_KEY},
+		   $turn_attr{$DIALECT_KEY}, 
+		   $turn_attr{$FIDELITY_KEY}, 
+		   $turn_attr{$MODE_KEY}, 
+		   $bkgrnd_attr_stack{$MUSIC_KEY}, 
 		   $bkgrnd_attr_stack{$SPEECH_KEY},
-                   $bkgrnd_attr_stack{$OTHER_KEY});
+                   $bkgrnd_attr_stack{$OTHER_KEY}); 
  	    $turn_elems{$TEXT_KEY} = "";
 	    @text_elem = ();
 	}
     }
-
+    
     if ($norm_tag eq "FOREIGN" || $norm_tag eq "UNCLEAR") {
 	$parenthesize_text = 1;
     }
@@ -1353,10 +1361,10 @@ sub proc_end_ASR_tag{
 		$turn_elems{$TEXT_KEY} = $IGNORE_TIME_SEGMENT_IN_SCORING;
 	    }
 	    push @turn_stack, { %turn_elems };
-
+	    
 	    %turn_elems = ();
 	    @text_elem = ();
-
+	    
 	    # copy prev attribute over
 	    #
 	    for $key (keys %section_attr) {
@@ -1372,19 +1380,19 @@ sub proc_end_ASR_tag{
 		$endtime_tag = $3;
 		$endtime = $4;
 	    }
-
+	    
 	    if ($turn_elems{$endtime_tag} != $endtime) {
-
+		
 		$turn_elems{$starttime_tag} = $endtime;
 		$turn_elems{$FILENAME_KEY} = $filename;
 		$turn_elems{$NUM_CHAN_KEY} = $num_chan;
 		$turn_elems{$FOCUS_COND_KEY} = &proc_get_focus_cond(
-			    $turn_attr{$DIALECT_KEY},
-                            $turn_attr{$FIDELITY_KEY},
-                            $turn_attr{$MODE_KEY},
-                            $bkgrnd_attr_stack{$MUSIC_KEY},
+			    $turn_attr{$DIALECT_KEY}, 
+                            $turn_attr{$FIDELITY_KEY}, 
+                            $turn_attr{$MODE_KEY}, 
+                            $bkgrnd_attr_stack{$MUSIC_KEY}, 
                             $bkgrnd_attr_stack{$SPEECH_KEY},
-                            $bkgrnd_attr_stack{$OTHER_KEY});
+                            $bkgrnd_attr_stack{$OTHER_KEY}); 
 	        $turn_elems{$TEXT_KEY} = "";
 	    }
 	    else {
@@ -1397,13 +1405,13 @@ sub proc_end_ASR_tag{
 	     $#text_elem >= 0) {
 	### divide the turn here so that the inferred word time work out
 	if ($asr_attr_stack{$norm_tag} =~
-	    /(STARTTIME)=(\S+)\s*(ENDTIME)=(\S+)\>/) {
+	    /(STARTTIME)=(\S+)\s*(ENDTIME)=(\S+)\>/) {	
 	    $starttime_tag = $1;
 	    $starttime = $2;
 	    $endtime_tag = $3;
 	    $endtime = $4;
 
-	    #### flush the residual data
+	    #### flush the residual data 
 	    $turn_elems{$endtime_tag} = $endtime;
 	    &proc_preproc_text (*text_elem);
 	    $turn_elems{$TEXT_KEY} .= join(" ",@text_elem) . " ";
@@ -1414,22 +1422,22 @@ sub proc_end_ASR_tag{
 	    for $key (keys %section_attr) {
 		$turn_elems{$key} = $section_attr{$key};
 	    }
-
+	    
 	    for $key (keys %turn_attr) {
 		$turn_elems{$key} = $turn_attr{$key};
 	    }
-
+	    
 	    $turn_elems{$starttime_tag} = $endtime;
 	    $turn_elems{$endtime_tag} = $turn_attr{$endtime_tag};
 	    $turn_elems{$FILENAME_KEY} = $filename;
 	    $turn_elems{$NUM_CHAN_KEY} = $num_chan;
 	    $turn_elems{$FOCUS_COND_KEY} = &proc_get_focus_cond(
-		   $turn_attr{$DIALECT_KEY},
-		   $turn_attr{$FIDELITY_KEY},
-		   $turn_attr{$MODE_KEY},
-		   $bkgrnd_attr_stack{$MUSIC_KEY},
+		   $turn_attr{$DIALECT_KEY}, 
+		   $turn_attr{$FIDELITY_KEY}, 
+		   $turn_attr{$MODE_KEY}, 
+		   $bkgrnd_attr_stack{$MUSIC_KEY}, 
 		   $bkgrnd_attr_stack{$SPEECH_KEY},
-                   $bkgrnd_attr_stack{$OTHER_KEY});
+                   $bkgrnd_attr_stack{$OTHER_KEY}); 
  	    $turn_elems{$TEXT_KEY} = "";
 	    @text_elem = ();
 	}
@@ -1440,7 +1448,7 @@ sub proc_end_ASR_tag{
     if ($norm_tag eq "FOREIGN" || $norm_tag eq "UNCLEAR") {
 	$parenthesize_text = 0;
     }
-
+    
     delete $asr_attr_stack{$norm_tag};
 
     # print "==== exit text arr '".join(" ",@text_elem)."'\n";
@@ -1470,7 +1478,7 @@ sub proc_beg_cont{
 	if (! $data->attribute($key)->is_implied){
 	    $attr_stack{$data->name} .= "$key=" . $data->attribute($key)->value . " ";
 	}
-    }
+    }    
 }
 
 
@@ -1483,9 +1491,9 @@ sub proc_beg_bkgrnd{
 
     # get the current focus condition. The reason is that sometimes
     # the level of noise changing from high->low or low->high is not
-    # enough to split the turn.  When they do split the turn (high/low->off
-    # or off->high/low) the focus condition is still the
-    # condition before high->low or low->high changes. We need to get the
+    # enough to split the turn.  When they do split the turn (high/low->off 
+    # or off->high/low) the focus condition is still the 
+    # condition before high->low or low->high changes. We need to get the 
     # focus condition after the high->low and vice versa changes but before
     # the high/low->off and vice versa changes
     #
@@ -1497,12 +1505,12 @@ sub proc_beg_bkgrnd{
 
     if ($in_turn) {
 	$cur_focus_cond = &proc_get_focus_cond(
-                      $turn_attr{$DIALECT_KEY},
-                      $turn_attr{$FIDELITY_KEY},
-                      $turn_attr{$MODE_KEY},
-                      $bkgrnd_attr_stack{$MUSIC_KEY},
+                      $turn_attr{$DIALECT_KEY}, 
+                      $turn_attr{$FIDELITY_KEY}, 
+                      $turn_attr{$MODE_KEY}, 
+                      $bkgrnd_attr_stack{$MUSIC_KEY}, 
                       $bkgrnd_attr_stack{$SPEECH_KEY},
-		      $bkgrnd_attr_stack{$OTHER_KEY});
+		      $bkgrnd_attr_stack{$OTHER_KEY}); 
     }
 
     ### I believe this is BAD, it should be ...
@@ -1518,7 +1526,7 @@ sub proc_beg_bkgrnd{
     foreach $key($data->attribute_names){
 	if (! $data->attribute($key)->is_implied){
 	    if (lc($data->attribute($key)->value) eq "music") {
-		$bkgrnd_attr_stack{$MUSIC_KEY} =
+		$bkgrnd_attr_stack{$MUSIC_KEY} = 
 		    lc($data->attribute($LEVEL_KEY)->value);
 		if ($bkgrnd_attr_stack{$MUSIC_KEY} eq $HIGH ||
 		    $bkgrnd_attr_stack{$MUSIC_KEY} eq $LOW) {
@@ -1529,7 +1537,7 @@ sub proc_beg_bkgrnd{
 		}
 	    }
 	    elsif (lc($data->attribute($key)->value) eq "speech") {
-		$bkgrnd_attr_stack{$SPEECH_KEY} =
+		$bkgrnd_attr_stack{$SPEECH_KEY} = 
 		    lc($data->attribute($LEVEL_KEY)->value);
 		if ($bkgrnd_attr_stack{$SPEECH_KEY} eq $HIGH ||
 		    $bkgrnd_attr_stack{$SPEECH_KEY} eq $LOW) {
@@ -1540,7 +1548,7 @@ sub proc_beg_bkgrnd{
 		}
 	    }
 	    elsif (lc($data->attribute($key)->value) eq "other") {
-		$bkgrnd_attr_stack{$OTHER_KEY} =
+		$bkgrnd_attr_stack{$OTHER_KEY} = 
 		    lc($data->attribute($LEVEL_KEY)->value);
 		if ($bkgrnd_attr_stack{$OTHER_KEY} eq $HIGH ||
 		    $bkgrnd_attr_stack{$OTHER_KEY} eq $LOW) {
@@ -1551,7 +1559,7 @@ sub proc_beg_bkgrnd{
 		}
 	    }
 	    elsif ($key eq $TURN_STIME_KEY) {
-		$bkgrnd_attr_stack{$TURN_STIME_KEY} =
+		$bkgrnd_attr_stack{$TURN_STIME_KEY} = 
 		    $data->attribute($key)->value;
 	    }
 	}
@@ -1579,21 +1587,21 @@ sub proc_beg_bkgrnd{
 	    local $i;
 	    $turn_elems{$FOCUS_COND_KEY} = $cur_focus_cond;
 	    $turn_elems{$TEXT_KEY} = "";
-
+	    
 	    # see note in proc_end_turn routine
 	    #
 	    &proc_preproc_text (*text_elem);
-
+	    
 	    for ($i = 0; $i <= $#text_elem; $i++) {
 		$turn_elems{$TEXT_KEY} .= $text_elem[$i] . " ";
 	    }
-
+	    
 	    push @turn_stack, { %turn_elems };
 	    ### { my $x1; print "About to push:\n"; foreach $x1(sort(keys %turn_elems)){print "   $x1 -> '$turn_elems{$x1}'\n"; } }
 
 	    %turn_elems = ();
 	    @text_elem = ();
-
+	    
 	    # copy prev attribute over
 	    #
 	    for $key (keys %section_attr) {
@@ -1602,21 +1610,21 @@ sub proc_beg_bkgrnd{
 	    for $key (keys %turn_attr) {
 		$turn_elems{$key} = $turn_attr{$key};
 	    }
-
+	    
 	    $turn_elems{$TURN_STIME_KEY} = $bkgrnd_attr_stack{$TURN_STIME_KEY};
 	    $turn_elems{$TURN_ETIME_KEY} = $starttime;
 	    $turn_elems{$FILENAME_KEY} = $filename;
 	    $turn_elems{$NUM_CHAN_KEY} = $num_chan;
 	    $turn_elems{$FOCUS_COND_KEY} = &proc_get_focus_cond(
-                      $turn_attr{$DIALECT_KEY},
-                      $turn_attr{$FIDELITY_KEY},
-                      $turn_attr{$MODE_KEY},
-                      $bkgrnd_attr_stack{$MUSIC_KEY},
+                      $turn_attr{$DIALECT_KEY}, 
+                      $turn_attr{$FIDELITY_KEY}, 
+                      $turn_attr{$MODE_KEY}, 
+                      $bkgrnd_attr_stack{$MUSIC_KEY}, 
                       $bkgrnd_attr_stack{$SPEECH_KEY},
-		      $bkgrnd_attr_stack{$OTHER_KEY});
-
+		      $bkgrnd_attr_stack{$OTHER_KEY}); 
+	    
 	}
-
+	
     }
     $music_level = $mlevel;
     $speech_level = $slevel;
@@ -1641,10 +1649,10 @@ sub proc_beg_bkgrnd{
 #  j               ###########          i
 #7 j               ###############      overlap begin i end j
 #8 j                         #####      no overlapped
-#
+# 
 # return : an array of 3 items
 #  no overlap or overlap, begin time, and end time
-#
+#  
 sub proc_is_overlap{
 
     local ($btime_i, $etime_i, $chan_i, $btime_j, $etime_j, $chan_j) = @_;
@@ -1652,7 +1660,7 @@ sub proc_is_overlap{
 #    print "($btime_i, $etime_i, $chan_i, $btime_j, $etime_j, $chan_j)\n";
 
     local @return_val = ();
-
+    
     # Initial case
     #
     if ($chan_i ne $chan_j) {
@@ -1661,7 +1669,7 @@ sub proc_is_overlap{
 	push(@return_val, 0);
 	return (@return_val);
     }
-
+    
 
     # case 1
     #
@@ -1750,7 +1758,7 @@ sub proc_is_overlap{
 }
 
 sub proc_elim_overlap{
-
+    
     local(*stack) = @_;
     local $i;
     local $j;
@@ -1762,7 +1770,7 @@ sub proc_elim_overlap{
 	for ($j = $i+1; $j <= $#stack &&
 	     $stack[$j]{$TURN_STIME_KEY}-5 < $stack[$i]{$TURN_ETIME_KEY};
 	     $j++) {
-	    @status = &proc_is_overlap($stack[$i]{$TURN_STIME_KEY},
+	    @status = &proc_is_overlap($stack[$i]{$TURN_STIME_KEY}, 
 				       $stack[$i]{$TURN_ETIME_KEY},
 				       $stack[$i]{$TURN_CHANNEL_KEY},
 				       $stack[$j]{$TURN_STIME_KEY},
@@ -1774,15 +1782,15 @@ sub proc_elim_overlap{
 		    print "${DBoff}     ".join(" ",%{ $stack[$i] })."\n";
 		    print "${DBoff}     ".join(" ",%{ $stack[$j] })."\n";
 		}
-
+		
 		### Convert $i to an exclude tag
 		$stack[$i]{$SPEAKER_KEY} = $EXCLUDED_REGION;
 		$stack[$i]{$SPKRTYPE_KEY} = $UNKNOWN;
-		$stack[$i]{$TURN_STIME_KEY} =
-		    &MIN($stack[$i]{$TURN_STIME_KEY},
+		$stack[$i]{$TURN_STIME_KEY} = 
+		    &MIN($stack[$i]{$TURN_STIME_KEY}, 
 			 $stack[$j]{$TURN_STIME_KEY});
-		$stack[$i]{$TURN_ETIME_KEY} =
-		    &MAX($stack[$i]{$TURN_ETIME_KEY},
+		$stack[$i]{$TURN_ETIME_KEY} = 
+		    &MAX($stack[$i]{$TURN_ETIME_KEY}, 
 			 $stack[$j]{$TURN_ETIME_KEY});
 		$stack[$i]{$FOCUS_COND_KEY} = "";
 		if ($keep_exclude_text) {
@@ -1793,7 +1801,7 @@ sub proc_elim_overlap{
 
 		### Delete Stack element $j
 		splice(@stack,$j,1);
-
+		
 		### Decriment $j to reflect the deletion
 		$j--;
 	    }
@@ -1808,7 +1816,7 @@ sub write_stm_header{
     print $fp ";; LABEL \"O\" \"Overall\" \"Overall\"\n";
     print $fp ";;\n";
     $cat ++;
-
+    
     if ($focus_condition_enabled) {
 	print $fp ";; CATEGORY \"$cat\" \"Hub4 Focus Conditions\" \"\"\n";
 	print $fp ";; LABEL \"F0\" \"Baseline//Broadcast//Speech\" \"\"\n";
@@ -1832,7 +1840,7 @@ sub proc_print_stack{
 
     local($fp, $format, *stack) = @_;
     local $i;
-
+    
     if ($format eq $IESTM || $format eq $STM) {
 	&write_stm_header($fp);
 	&proc_print_stm($fp, *stack);
@@ -1855,34 +1863,34 @@ sub proc_print_stack{
 }
 
 sub proc_get_focus_cond{
-
-    local($dialect, $fidelity, $mode, $music_lvl, $speech_lvl,
+    
+    local($dialect, $fidelity, $mode, $music_lvl, $speech_lvl, 
 	  $other_lvl) = @_;
 
     local $focus_cond = "";
-
+	    
     # determine focus condition from dialect, fidelity, mode, and background
     # attributes
     #
     # F0, F1, F2, F3, F4, FX
     #
     if ($dialect eq "$NATIVE") {
-
+	
 	# F0, F1, F3, F4, FX
 	#
 	if ($fidelity eq $HIGH) {
-
+	    
 	    # F0, F1, FX
 	    #
 	    if ($music_lvl eq $OFF && $speech_lvl eq $OFF &&
 		$other_lvl eq $OFF) {
-
+		
 		# F0
 		#
 		if ($mode eq "$PLANNED") {
 		    $focus_cond = "f0";
 		}
-
+		
 		# F1
 		#
 		elsif ($mode eq "$SPONTANEOUS") {
@@ -1895,14 +1903,14 @@ sub proc_get_focus_cond{
 		    $focus_cond = "fx";
 		}
 	    }
-
+	    
 	    # F3
 	    #
-	    elsif ($music_lvl ne $OFF && $speech_lvl eq $OFF &&
+	    elsif ($music_lvl ne $OFF && $speech_lvl eq $OFF && 
 		   $other_lvl eq $OFF) {
 		$focus_cond = "f3";
 	    }
-
+		
 	    # F4
 	    #
 	    elsif ($music_lvl eq $OFF && ($speech_lvl ne $OFF ||
@@ -1916,7 +1924,7 @@ sub proc_get_focus_cond{
 		$focus_cond = "fx";
 	    }
 	}
-
+	
 	# F2, FX
 	#
 	else {
@@ -1938,7 +1946,7 @@ sub proc_get_focus_cond{
     # F5, FX
     #
     else {
-
+	
 	# F5, FX
 	#
 	if ($fidelity eq $HIGH) {
@@ -1962,7 +1970,7 @@ sub proc_get_focus_cond{
 		$focus_cond = "fx";
 	    }
 	}
-
+	
 	# FX
 	#
 	else {
@@ -1970,7 +1978,7 @@ sub proc_get_focus_cond{
 	}
     }
     die "Error: Focus condition not assigned" if ($focus_cond eq "");
-    return ($focus_cond);
+    return ($focus_cond);    
 }
 
 sub proc_fill_gap{
@@ -1982,9 +1990,9 @@ sub proc_fill_gap{
     local %tmp_turn = ();
 
     while ($i < $#stack) {
-
+	
 	%tmp_turn = ();
-
+        
         # there's a gap
 	#
 	if ($stack[$i+1]{$TURN_STIME_KEY} - $stack[$i]{$TURN_ETIME_KEY} > $THRESHOLD) {
@@ -2047,7 +2055,7 @@ sub proc_del_turn{
 
 	if ($stack[$i]{$TEXT_KEY} =~ /^\s*$/) {
 	    splice @stack, $i, 1;
-	}
+	} 
 	else {
 	    $i++;
 	}
@@ -2089,7 +2097,7 @@ sub proc_print_stm {
 
 sub proc_print_stm_sm_u {
     local ($fp, *stack) = @_;
-
+    
     local $prev_stime = -1;
     local $prev_etime = -1;
 
@@ -2099,17 +2107,17 @@ sub proc_print_stm_sm_u {
 	if (($stack[$i]{$SECTION_STIME_KEY} != $prev_stime) &&
 	    ($stack[$i]{$SECTION_ETIME_KEY} != $prev_etime) &&
 	    ($stack[$i]{$SECTION_STIME_KEY} != -1)) {
-
+	    
 	    if ($i != 0) {
 		print $fp "</Section>\n";
 	    }
 	    printf $fp ("<Section Type=%s S_time=%.6f E_time=%.6f id=%s>\n",
-			$stack[$i]{$SECTION_TYPE_KEY},
-			$stack[$i]{$SECTION_STIME_KEY},
-			$stack[$i]{$SECTION_ETIME_KEY},
+			$stack[$i]{$SECTION_TYPE_KEY}, 
+			$stack[$i]{$SECTION_STIME_KEY}, 
+			$stack[$i]{$SECTION_ETIME_KEY}, 
 			$stack[$i]{$SECTION_ID_KEY});
-	    $prev_stime = $stack[$i]{$SECTION_STIME_KEY};
-	    $prev_etime = $stack[$i]{$SECTION_ETIME_KEY};
+	    $prev_stime = $stack[$i]{$SECTION_STIME_KEY}; 
+	    $prev_etime = $stack[$i]{$SECTION_ETIME_KEY}; 
 	}
 	print $fp "$stack[$i]{$FILENAME_KEY} ";
 	print $fp "$stack[$i]{$TURN_CHANNEL_KEY} ";
@@ -2120,7 +2128,7 @@ sub proc_print_stm_sm_u {
 	$temp_focus_cond = "<o";
 	if ($focus_condition_enabled) {
 	    $temp_focus_cond .= ",".$stack[$i]{$FOCUS_COND_KEY};
-	}
+	}	
 	$temp_focus_cond .= ",$stack[$i]{$SPKRTYPE_KEY}";
 	$temp_focus_cond .= ">";
 
@@ -2146,11 +2154,11 @@ sub proc_stm2ctm_wavg{
 	    $stime = $stack[$i]{$TURN_STIME_KEY};
 	    @num_words = ();
 
-	    ### Delete optionally deletable words!!!!
+	    ### Delete optionally deletable words!!!!	    
 	    # ($newtext = $stack[$i]{$TEXT_KEY}) =~ s/\([^\(\)]*\)//g;
 	    ### Convert optionally deletable words to normal words
 	    ($newtext = $stack[$i]{$TEXT_KEY}) =~ s/[\(\)]//g;
-
+	    
 	    foreach $word(ie_split($newtext)) {
 		if ($word !~ /^\s*$/){
 		    push(@num_words,$word) if ($word !~ /^(-\S+|\S+-)$/);
@@ -2158,7 +2166,7 @@ sub proc_stm2ctm_wavg{
 	    }
 	    ### splice back together
 #	    for ($j=0; $j<$#num_words; $j++){
-#		if ($num_words[$j] =~ /<(ENAMEX|TIMEX|NUMEX)/i){
+#		if ($num_words[$j] =~ /<(ENAMEX|TIMEX|NUMEX)/i){	
 #		    if ($num_words[$j] !~ /<\/(ENAMEX|TIMEX|NUMEX)>/i){
 #			$num_words[$j] .= "#".splice(@num_words,$j+1,1);
 #			$j--;
@@ -2167,18 +2175,18 @@ sub proc_stm2ctm_wavg{
 #	    }
 
 
-#           ALD FIX
+#           ALD FIX	    
 #	    for ($j=0; $j<$#num_words; $j++){
-#		if ($num_words[$j] =~ /<(ENAMEX|TIMEX|NUMEX)/i){
+#		if ($num_words[$j] =~ /<(ENAMEX|TIMEX|NUMEX)/i){	
 #		    $num_words[$j] .= splice(@num_words,$j+1,1);
 #		} elsif ($num_words[$j] =~ /<\/(ENAMEX|TIMEX|NUMEX)>/i){
 #		    $num_words[$j-1] .= splice(@num_words,$j,1);
 #		    $j--;
 #		}
 #	    }
-
+	    
 	    for ($j=0; $j<$#num_words; $j++){
-		if ($num_words[$j] =~ /^<(ENAMEX|TIMEX|NUMEX)[^<>]*>$/i){
+		if ($num_words[$j] =~ /^<(ENAMEX|TIMEX|NUMEX)[^<>]*>$/i){	
 		    $num_words[$j] .= splice(@num_words,$j+1,1);
 		} elsif ($num_words[$j] =~ /^<\/(ENAMEX|TIMEX|NUMEX)[^<>]*>$/i){
 		    $num_words[$j-1] .= splice(@num_words,$j,1);
@@ -2230,7 +2238,7 @@ sub proc_stm2ctm_wspec{
 	if ($stack[$i]{$TEXT_KEY} ne $IGNORE_TIME_SEGMENT_IN_SCORING) {
 	    @num_words = ();
 	    @num_words = split(/STIME=/, $stack[$i]{$TEXT_KEY});
-
+	    
 	    print "${DBoff} stm2ctm wspec: ~".join("~",@num_words)."~\n"
 		if ($debug_level > $DEBUG_DETAIL) ;
 	    for ($j = 0; $j <= $#num_words; $j++) {

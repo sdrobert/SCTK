@@ -47,17 +47,18 @@ unless (defined($outdir)) {
   $outdir = File::Temp->newdir();
 }
 
-unless (defined($dtd)) {
-  $dtd = File::Spec->canonpath($indir . "/..");
+if (defined($dtd)) {
+  $dtd = "-e $dtd";
 }
 
 sub run_test {
   my ($name, $cmd, $exp) = @_;
-  print "Beginning $name\n";
+  print "Beginning $name: $cmd\n";
   $exp = File::Spec->catfile($indir, $exp);
   my $act = File::Spec->catfile($outdir, basename($exp).".act");
   open(my $act_fh, '>', $act);
   print $act_fh `$cmd`;
+  die("Command failed!") if ($?);
   # die "$name error: $!" if $?;
   close($act_fh);
   if (compare_text($exp, $act)) {
@@ -69,11 +70,11 @@ sub run_test {
   }
 }
 
-my $prefix = "$perl utf_filt.pl -e $dtd -f stm -o - -d";
+my $prefix = "$perl utf_filt.pl $dtd -f stm -o - -d";
 
 run_test("test_man", "$prefix -i $indir/test.man.utf", "test.man.stm");
 run_test("test_eng", "$prefix -i $indir/test.eng.utf", "test.eng.stm");
-run_test("test_eng_notrans_stm", "$prefix -n -i $indir/test.eng.utf", "test.eng.notrans.stm");
+run_test("test_eng_notrans_stm", "$prefix -t -n -i $indir/test.eng.utf", "test.eng.notrans.stm");
 # perl utf_filt.pl -s $(NSGMLS) -e utf-1.2.dtd -f stm -i ../test_suite/test.man.utf -o - -d | diff - ../test_suite/test.man.stm;
 # perl utf_filt.pl -s $(NSGMLS) -e utf-1.2.dtd -f stm -i ../test_suite/test.eng.utf -o - -d | diff - ../test_suite/test.eng.stm;
 # perl utf_filt.pl -s $(NSGMLS) -t -n -e utf-1.2.dtd -f stm -i ../test_suite/test.eng.utf -o - -d | diff - ../test_suite/test.eng.notrans.stm;
