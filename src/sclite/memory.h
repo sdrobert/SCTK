@@ -32,23 +32,23 @@ int _msz_;
 #define MEMORY_H_VERSION "V2.1"
 #define alloc_1dimarr(_arg,_len,_type) alloc_singarr(_arg,_len,_type)
 #define alloc_1dimZ(_arg,_len,_type,_val) alloc_singZ(_arg,_len,_type,_val)
-#define free_1dimarr(_fl,_ty) free_singarr(_fl,_ty) 
+#define free_1dimarr(_fl,_ty) free_singarr(_fl,_ty)
 
 #ifndef WARN_ZERO_MALLOC
 #define alloc_singarr(_arg,_len,_type) \
-  {  if ((_msz_=(_len) * sizeof(_type)) == 0) _msz_++; \
-     if ((_arg=(_type *)malloc(_msz_))==(_type *)NULL) malloc_died(_msz_); }
+  {  if ((_msz_=(_len)) == 0) _msz_++; \
+     if ((_arg=(_type *)calloc(_msz_, sizeof(_type)))==(_type *)NULL) malloc_died(_msz_); }
 #else
 #define alloc_singarr(_arg,_len,_type) \
-  {  if ((_msz_=(_len) * sizeof(_type)) == 0) \
+  {  if ((_msz_=(_len)) == 0) \
         { printf("Warning: malloc of size 0 changed to 1\n"); _msz_++; } \
-     if ((_arg=(_type *)malloc(_msz_))==(_type *)NULL) malloc_died(_msz_); }
+     if ((_arg=(_type *)calloc(_msz_, sizeof(_type)))==(_type *)NULL) malloc_died(_msz_); }
 #endif
 
 /*#define alloc_singarr(_arg,_len,_type) \ */
-/*    if ((_arg=(_type *)malloc((_len) * sizeof(_type)))==(_type *)NULL) \ */
+/*    if ((_arg=(_type *)calloc((_len, sizeof(_type))))==(_type *)NULL) \ */
 /*       malloc_died((_len)*sizeof(_type)); */
-     
+
 
 #define alloc_2dimarr(_arg,_num,_len,_type) \
       { register int _mn; \

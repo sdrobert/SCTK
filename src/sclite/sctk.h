@@ -36,7 +36,7 @@ extern "C" {
 #define db_enter_msg(_s,_db) {if (_db < db_level) printf("DB: Entering %s\n",_s);}
 #define db_leave_msg(_s,_db) {if (_db < db_level) printf("DB: Leaving  %s\n",_s);}
 #define strdup_safe(_s,_p) (char *)TEXT_strdup((TEXT *)_s)
-#define malloc_safe(_s,_p) malloc(_s)
+#define malloc_safe(_s,_p) calloc(_s, 1)
 #define streq(cs,ct)       (strcmp(cs,ct) == 0)
 #ifdef __STDC__
 /* rsprinaztf.c */ char *rsprintf PROTO((char *format , ...));

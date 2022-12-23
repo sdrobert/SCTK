@@ -21,10 +21,15 @@ int qsort_short_deccmp(const void *p, const void *p1);
 
 static short *short_cmp_arr;
 int qsort_short_cmp(const void *p, const void *p1){
-    return(short_cmp_arr[*((int *)p)] - short_cmp_arr[*((int *)p1)]);
+    const int a = *((int *)p);
+    const int a1 = *((int *)p1);
+    const short s = short_cmp_arr[a];
+    const short s1 = short_cmp_arr[a1];
+    const int c = (s > s1) - (s1 > s);
+    return c ? c : (a - a1);
 }
 int qsort_short_deccmp(const void *p, const void *p1){
-    return(short_cmp_arr[*((int *)p1)] - short_cmp_arr[*((int *)p)]);
+    return qsort_short_cmp(p1, p);
 }
 
 /**********************************************************************/
@@ -34,10 +39,15 @@ int qsort_int_deccmp(const void *p, const void *p1);
 
 static int *int_cmp_arr;
 int qsort_int_cmp(const void *p, const void *p1){
-    return(int_cmp_arr[*((int *)p)] - int_cmp_arr[*((int *)p1)]);
+    const int a = *((int *)p);
+    const int a1 = *((int *)p1);
+    const int i = int_cmp_arr[a];
+    const int i1 = int_cmp_arr[a1];
+    const int c = (i > i1) - (i1 > i);
+    return c ? c : (a - a1);
 }
 int qsort_int_deccmp(const void *p, const void *p1){
-    return(int_cmp_arr[*((int *)p1)] - int_cmp_arr[*((int *)p)]);
+    return qsort_int_cmp(p1, p);
 }
 int qsort_int_compare(const void *i, const void *j) {
     return(*((int *)i) - *((int *)j)); 
@@ -53,12 +63,15 @@ int qsort_double_deccmp(const void *p, const void *p1);
 
 static double *double_cmp_arr;
 int qsort_double_cmp(const void *p, const void *p1){
-    double f = double_cmp_arr[*((int *)p)] - double_cmp_arr[*((int *)p1)];
-    return((f < 0.0) ? -1 : ((f > 0) ? 1 : 0));
+    const int a = *((int *)p);
+    const int a1 = *((int *)p1);
+    const double d = double_cmp_arr[a];
+    const double d1 = double_cmp_arr[a1];
+    const int c = (d > d1) - (d1 > d);
+    return c ? c : (a - a1);
 }
 int qsort_double_deccmp(const void *p, const void *p1){
-    double f = double_cmp_arr[*((int *)p1)] - double_cmp_arr[*((int *)p)];
-    return((f < 0.0) ? -1 : ((f > 0) ? 1 : 0));
+    return qsort_double_cmp(p1, p);
 }
 int qsort_double_compare(const void *i, const void *j) {
     double f = *((double *)i) - *((double *)j);

@@ -40,6 +40,7 @@ src/utf_filt/makefile
 
 # sdrobert
 build
+lbuild
 install
 .vscode
 

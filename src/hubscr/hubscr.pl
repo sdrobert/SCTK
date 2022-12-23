@@ -2,7 +2,9 @@
 
 use strict;
 use Config;
-use IPC::Cmd qw(can_run run);
+use IPC::Cmd qw(run);
+use File::Basename qw(dirname);
+use File::Spec::Functions qw(catfile);
 
 ### Revision History
 # Version 0.1, Release Sep 19, 1997
@@ -149,6 +151,7 @@ my $Usage="hubscr.pl [ -p PATH -H -T -d -R -v -L LEX ] [ -M LM | -w WWL ] [ -o n
     my $CTMVALID = "ctmValidator.pl";
     my $STMVALID = "stmValidator.pl";
     my $RTTMVALID = "rttmValidator.pl";
+    my $RTTMSORT = "rttmSort.pl";
     my $DEF_ART_ENABLED=1;
     my $HAMZA_NORM_ENABLED=0;
     my $TANWEEN_FILT_ENABLED=0;
@@ -178,17 +181,32 @@ my $Usage="hubscr.pl [ -p PATH -H -T -d -R -v -L LEX ] [ -M LM | -w WWL ] [ -o n
     my $validateInputs = 1;
 
     my $cat;
-    if ("$^O" =~ /win/) {
+    if ("$^O" =~ /win/i) {
         $cat = "type";
     } else {
         $cat = "cat";
     }
+    my $perl = $Config{perlpath};
+    my $script_dir = dirname(__FILE__);
 #######         End of Globals         #########
 ################################################
 
 ################################################
 #######          MAIN PROGRAM          #########
 &ProcessCommandLine();
+
+$ALIGN2HTML = PerlScriptToCmd($ALIGN2HTML);
+$CSRFILT = PerlScriptToCmd($CSRFILT);
+$DEF_ART = PerlScriptToCmd($DEF_ART);
+$HAMZA_NORM = PerlScriptToCmd($HAMZA_NORM);
+$TANWEEN_FILTER = PerlScriptToCmd($TANWEEN_FILTER);
+$STM2RTTM = PerlScriptToCmd($STM2RTTM);
+$ACOMP = PerlScriptToCmd($ACOMP);
+$MDEVAL = PerlScriptToCmd($MDEVAL);
+$CTMVALID = PerlScriptToCmd($CTMVALID);
+$STMVALID = PerlScriptToCmd($STMVALID);
+$RTTMVALID = PerlScriptToCmd($RTTMVALID);
+$RTTMSORT = PerlScriptToCmd($RTTMSORT);
 
 my($h);
 &VerifyResources();
@@ -219,6 +237,19 @@ exit 0;
 
 ################################################################
 ################ Get the command line arguments ################
+
+sub PerlScriptToCmd
+{
+    my ($script) = @_;
+    my $f = catfile($script_dir, $script);
+    return "$perl $f" if (-e $f);
+    foreach (split($Config::Config{path_sep}, $ENV{PATH})) {
+        $f = catfile($_, $script);
+        return "$perl $f" if (-e $f);
+    }
+    die "Unable to find '$script' (update path?)";
+}
+
 sub ProcessCommandLine
 {
 	### This is an invisible option.  If the calling name is sortCTM.pl, run the sorter
@@ -340,7 +371,7 @@ sub ProcessCommandLine
 
     if (defined($main::opt_p)){
     	my $p = $main::opt_p;
-    	die "Error: Path not formatted properly '$p'" if ($p !~ /^(\S+)([:;]\S+)*$/);
+    	die "Error: Path not formatted properly '$p'" if ($p !~ /^(\S+)([$Config::Config{path_sep}]\S+)*$/);
         $ENV{PATH} = "$p${Config::Config{path_sep}}$ENV{PATH}";
     }
 
@@ -543,26 +574,26 @@ sub FilterFile
 
     if ($Hub eq "rt-stt" && $format eq "ctm")
     {
-        if ("$^O" =~ /win/) {
-            $rtFilt = "| perl -nae \"if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\"\" \"\" ,\@F).\"\"\\n\"\" }}\" ";
+        if ("$^O" =~ /win/i) {
+            $rtFilt = "| $perl -nae \"if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\"\" \"\" ,\@F).\"\"\\n\"\" }}\" ";
         } else {
-            $rtFilt = "| perl -nae 'if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\" \" ,\@F).\"\\n\" }}' ";
+            $rtFilt = "| $perl -nae 'if (\$_ =~ /^;;/ || \$#F < 6) {print} else {s/^\\s+//; if (\$F[6] eq 'lex') { \$st = 6; \$st-- if (\$F[5] =~ /^na\$/i); splice(\@F, \$st, 10); print join(\" \" ,\@F).\"\\n\" }}' ";
         }
 	}
 
     if ($format eq "ctm")
     {
-	$sort_com = "$hubscr sortCTM < ";
+	$sort_com = "$perl $hubscr sortCTM < ";
 	#$sort_com = "cat";
 	#$sort_com = "sort +0 -1 +1 -2 +2nb -3";
     }
     elsif ($format eq "stm")
     {
-	$sort_com = "$hubscr sortSTM < ";
+	$sort_com = "$perl $hubscr sortSTM < ";
     }
     elsif ($format eq "rttm")
     {
-    	$sort_com = "rttmSort.pl < ";
+    	$sort_com = "$RTTMSORT < ";
     }
 
     if ($Lang =~ /^(arabic)$/)
@@ -627,7 +658,7 @@ sub FilterFile
 	}
 	$rtn = system "$vcom";
 	if ($rtn != 0){
-	    system $vcom . " | perl -pe \"s/^/      /\"";
+	    system $vcom . " | $perl -pe \"s/^/      /\"";
 	    print "Error: Filter operation yielded a non-validated $format output with return code $rtn\n";
 	    return 0;
 	}
