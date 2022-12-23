@@ -146,6 +146,8 @@
 #
 ########################################################
 
+use strict;
+
 
 ########################################################
 # constant definitions
@@ -153,80 +155,80 @@
 
 # fields for items in a stm turn
 #
-$FILENAME_KEY = "FILENAME";
-$NUM_CHAN_KEY = "NUM_CHAN";
-$SPEAKER_KEY = "SPEAKER";
-$SPKRTYPE_KEY = "SPKRTYPE";
-$TURN_STIME_KEY = "STARTTIME";
-$TURN_ETIME_KEY = "ENDTIME";
-$TURN_CHANNEL_KEY = "CHANNEL";
-$FOCUS_COND_KEY = "FOCUS_COND";
-$TEXT_KEY = "TEXT";
-$SECTION_STIME_KEY = "SECTION_STARTTIME";
-$SECTION_ETIME_KEY = "SECTION_ENDTIME";
-$SECTION_TYPE_KEY = "SECTION_TYPE";
-$SECTION_ID_KEY = "SECTION_ID";
+my $FILENAME_KEY = "FILENAME";
+my $NUM_CHAN_KEY = "NUM_CHAN";
+my $SPEAKER_KEY = "SPEAKER";
+my $SPKRTYPE_KEY = "SPKRTYPE";
+my $TURN_STIME_KEY = "STARTTIME";
+my $TURN_ETIME_KEY = "ENDTIME";
+my $TURN_CHANNEL_KEY = "CHANNEL";
+my $FOCUS_COND_KEY = "FOCUS_COND";
+my $TEXT_KEY = "TEXT";
+my $SECTION_STIME_KEY = "SECTION_STARTTIME";
+my $SECTION_ETIME_KEY = "SECTION_ENDTIME";
+my $SECTION_TYPE_KEY = "SECTION_TYPE";
+my $SECTION_ID_KEY = "SECTION_ID";
 
 # fields for determining the focus condition
 #
-$DIALECT_KEY = "DIALECT";
-$MODE_KEY = "MODE";
-$FIDELITY_KEY = "FIDELITY";
-$MUSIC_KEY = "MUSIC";
-$SPEECH_KEY = "SPEECH";
-$OTHER_KEY = "OTHER";
-$LEVEL_KEY = "LEVEL";
+my $DIALECT_KEY = "DIALECT";
+my $MODE_KEY = "MODE";
+my $FIDELITY_KEY = "FIDELITY";
+my $MUSIC_KEY = "MUSIC";
+my $SPEECH_KEY = "SPEECH";
+my $OTHER_KEY = "OTHER";
+my $LEVEL_KEY = "LEVEL";
 
 # noise and fidelity levels
 #
-$HIGH = "high";
-$LOW = "low";
-$ON = "on";
-$OFF = "off";
+my $HIGH = "high";
+my $LOW = "low";
+my $ON = "on";
+my $OFF = "off";
 
 # modes
 #
-$PLANNED = "planned";
-$SPONTANEOUS = "spontaneous";
+my $PLANNED = "planned";
+my $SPONTANEOUS = "spontaneous";
 
 # dialect types
 #
-$NATIVE = "native";
+my $NATIVE = "native";
 #$NONNATIVE = "nonnative";
 
 # constant strings in lower case. Must convert to lower case before
 # comparison
 #
-$IGNORE_TIME_SEGMENT_IN_SCORING = "ignore_time_segment_in_scoring";
-$EXCLUDED_REGION = "excluded_region";
-$INTER_SEGMENT_GAP = "inter_segment_gap";
-$UNKNOWN = "unk";
+my $IGNORE_TIME_SEGMENT_IN_SCORING = "ignore_time_segment_in_scoring";
+my $EXCLUDED_REGION = "excluded_region";
+my $INTER_SEGMENT_GAP = "inter_segment_gap";
+my $UNKNOWN = "unk";
 
 # misc. constants
 #
-$OVERLAP = 1;
-$NO_OVERLAP = -2;
-$THRESHOLD = 1;
+my $OVERLAP = 1;
+my $NO_OVERLAP = -2;
+my $THRESHOLD = 1;
 
 # output format
 #
-$STM = "STM";
-$IESTM = "IESTM";
-$IECTM = "IECTM";
-$CTM = "CTM";
-$IESM = "IESM";
-$SM = "SM";
+my $STM = "STM";
+my $IESTM = "IESTM";
+my $IECTM = "IECTM";
+my $CTM = "CTM";
+my $IESM = "IESM";
+my $SM = "SM";
 
 # debug level
 #
-$DEBUG_NONE = 0;
-$DEBUG_BRIEF = 1;
-$DEBUG_DETAIL = 2;
+my $DEBUG_NONE = 0;
+my $DEBUG_BRIEF = 1;
+my $DEBUG_DETAIL = 2;
 #$DEBUG_FULL = 4;
 
 # define usage statement
 #
-$USAGE = "\n\n$0 - reformats an UTF transcript into various formats\n\n".
+my $USAGE = "\n\n$0 - reformats an UTF transcript into various formats\n\n".
 "Usage: $0 [-wkph] -f <format> -e <dtd_file> -i <input file> -o <output file>\n\n".
 "Desc:  This script reformats an input UTF transcript file to various formats\n".
 "       The script uses the SGML DTD, and nsgmls to read the <input_file> and write\n".
@@ -258,80 +260,80 @@ $USAGE = "\n\n$0 - reformats an UTF transcript into various formats\n\n".
 "   -s 'prog' set the SGML parsing program name to 'prog'".
 "\n";
 
-@TextAttribs = ('ACOUSTICNOISE', 'NONSPEECH', 'ACRONYM', 'NONLEXEME', 'MISPRONOUNCED', 'MISSPELLING', 'PNAME', 'IDIOSYNCRATIC');
+my @TextAttribs = ('ACOUSTICNOISE', 'NONSPEECH', 'ACRONYM', 'NONLEXEME', 'MISPRONOUNCED', 'MISSPELLING', 'PNAME', 'IDIOSYNCRATIC');
 
-@NE_beg_tags = ('B_ENAMEX', 'B_TIMEX', 'B_NUMEX');
-@NE_end_tags = ('E_ENAMEX', 'E_TIMEX', 'E_NUMEX');
+my @NE_beg_tags = ('B_ENAMEX', 'B_TIMEX', 'B_NUMEX');
+my @NE_end_tags = ('E_ENAMEX', 'E_TIMEX', 'E_NUMEX');
 
-@ASR_beg_tags = ('B_FOREIGN', 'B_UNCLEAR', 'B_OVERLAP', 'B_NOSCORE', 'B_ASIDE');
-@ASR_end_tags = ('E_FOREIGN', 'E_UNCLEAR', 'E_OVERLAP', 'E_NOSCORE', 'E_ASIDE');
+my @ASR_beg_tags = ('B_FOREIGN', 'B_UNCLEAR', 'B_OVERLAP', 'B_NOSCORE', 'B_ASIDE');
+my @ASR_end_tags = ('E_FOREIGN', 'E_UNCLEAR', 'E_OVERLAP', 'E_NOSCORE', 'E_ASIDE');
 
-@PUNCT_tags = ('PERIOD', 'QMARK', 'COMMA');
+my @PUNCT_tags = ('PERIOD', 'QMARK', 'COMMA');
 
 # generate regular expressions once for speed
 #
-$TextAttribs_re = join("|",@TextAttribs);
-$NE_beg_tags_re = join("|",@NE_beg_tags);
-$NE_end_tags_re = join("|",@NE_end_tags);
-$ASR_beg_tags_re = join("|",@ASR_beg_tags);
-$ASR_end_tags_re = join("|",@ASR_end_tags);
-$PUNCT_tags_re = join("|",@PUNCT_tags);
+my $TextAttribs_re = join("|",@TextAttribs);
+my $NE_beg_tags_re = join("|",@NE_beg_tags);
+my $NE_end_tags_re = join("|",@NE_end_tags);
+my $ASR_beg_tags_re = join("|",@ASR_beg_tags);
+my $ASR_end_tags_re = join("|",@ASR_end_tags);
+my $PUNCT_tags_re = join("|",@PUNCT_tags);
 
 ########################################################
 # global variables
 ########################################################
 
-$conformance = 0;
-$incomment = 0;
-%attr_stack = ();
-%ne_attr_stack = ();
-%asr_attr_stack = ();
-%bkgrnd_attr_stack = ();
-%wtime_attr_stack = ();
-@sorted_section_stack = ();
-@section_stack = ();
-%section_attr = ();
-%turn_attr = ();
-@turn_stack = ();
-%turn_elems = ();
-@text_elem = ();
-$text = "";
-$text_flag = 0;
-$filename = "";
-$music_level = $OFF;  # default
-$speech_level = $OFF; # default
-$other_level = $OFF;  # default
-$num_chan = 1;        # default
-$in_turn = 0;         # 0 not in the middle of a turn, 1 otherwise
-$kept_turn = 1;       # 0 turn is not kept, 1 otherwise
-$format = $STM;       # default
-$use_wtag = 0;        # flag to use average word duration
-$process_overlap = 0; # flag to ignore overlap
-$input = "";
-$output = "";
-$dtd_file = "/home1/le/su_98/dtd/utf-1.0.dtd";
-$debug_level = $DEBUG_NONE;     # default no debugging info
-$display_help = 0;              # default no display of help file
-$focus_condition_enabled = 1;   # maek dat with focus conditions
-$inter_segment_gap_enabled = 1; #enable/disable marking inter-segment gaps
-$DBoff = "";
-$keep_exclude_text = 0;
-$translateContractions = 1;
-$translateNonlexemes = 1;
-$deleteNonspeech = 1;
-$deleteAcousticnoise = 1;
-my $NSGMLS;
-if ("@NSGMLS@" eq "NSGMLS-NOTFOUND") {
-	$NSGMLS = "nsgmls";  # hope it's there later!
+my $conformance = 0;
+my $incomment = 0;
+my %attr_stack = ();
+my %ne_attr_stack = ();
+my %asr_attr_stack = ();
+my %bkgrnd_attr_stack = ();
+my %wtime_attr_stack = ();
+our @sorted_section_stack = ();
+my @section_stack = ();
+my %section_attr = ();
+my %turn_attr = ();
+my @turn_stack = ();
+my %turn_elems = ();
+my @text_elem = ();
+our $text = "";
+my $text_flag = 0;
+my $filename = "";
+my $music_level = $OFF;  # default
+my $speech_level = $OFF; # default
+my $other_level = $OFF;  # default
+my $num_chan = 1;        # default
+my $in_turn = 0;         # 0 not in the middle of a turn, 1 otherwise
+my $kept_turn = 1;       # 0 turn is not kept, 1 otherwise
+our $format;
+my $use_wtag = 0;        # flag to use average word duration
+my $process_overlap = 0; # flag to ignore overlap
+my $input;
+my $output;
+my $dtd_file;
+my $debug_level = $DEBUG_NONE;     # default no debugging info
+my $display_help = 0;              # default no display of help file
+my $focus_condition_enabled = 1;   # maek dat with focus conditions
+my $inter_segment_gap_enabled = 1; #enable/disable marking inter-segment gaps
+my $DBoff = "";
+my $keep_exclude_text = 0;
+my $translateContractions = 1;
+my $translateNonlexemes = 1;
+my $deleteNonspeech = 1;
+my $deleteAcousticnoise = 1;
+my $nsgmls;
+if ("@NSGMLS@" eq "nsgmls-NOTFOUND") {
+	$nsgmls = "nsgmls";  # hope it's there later!
 } else {
-	$NSGMLS = "@NSGMLS@";
+	$nsgmls = "@NSGMLS@";
 }
-# my $cat;
-# if ("$^O" =~ /win/i) {
-# 		$cat = "type";
-# } else {
-# 		$cat = "cat";
-# }
+my $cat_;
+if ("$^O" =~ /win/i) {
+		$cat_ = "type";
+} else {
+		$cat_ = "cat";
+}
 
 
 ########################################################
@@ -347,50 +349,52 @@ use SGMLS;
 ########################################################
 
 use Getopt::Long;
-my $ret = GetOptions ("p", "w", "k", "c", "h", "d:i", "f=s", "e=s", "i=s", "o=s", "t", "n", "s=s");
+my $opt_k;
+GetOptions (
+	"p" => \$process_overlap,
+	"w" => \$use_wtag,
+	"k",
+	"c" => sub { $focus_condition_enabled = 0; },
+	"h" => sub { print($USAGE); exit(0); },
+	"d:i" => \$debug_level,
+	"f=s" => sub {
+		my ($opt_name, $opt_value) = @_;
+		($format = $opt_value) =~ tr/a-z/A-Z/;
+    die "${USAGE}Error: Unknown format -$opt_name '$format'"
+			if ($format !~ /^(IESTM|STM|IECTM|CTM|IESM|SM)$/);
+	},
+	"e=s" => sub {
+		my ($opt_name, $opt_value) = @_;
+		die "Error: DTD file -$opt_name '$opt_value' is not a readable file"
+			unless (-r $opt_value);
+    $dtd_file = $opt_value;
+	},
+	"i=s" => sub {
+		my ($opt_name, $opt_value) = @_;
+		die "Error: input file -$opt_name '$opt_value' is not a readable file"
+			unless (-r $opt_value);
+    $input = $opt_value;
+	},
+	"o=s" => \$output,
+	"t" => sub { $translateContractions = 0; },
+	"n" => sub {
+		$translateNonlexemes = $deleteNonspeech = $deleteAcousticnoise = 0;
+	},
+	"s=s" => \$nsgmls
+) or die("${USAGE}Error: Failed to parse options");
 
-$display_help = $opt_h if (defined($opt_h));
-if ($display_help) {
-    print "$USAGE";
-    exit(0);
-}
-$use_wtag = $opt_w if (defined($opt_w));
-$process_overlap = $opt_p if (defined($opt_p));
-$output = $opt_o if (defined($opt_o));
-$debug_level = $opt_d if (defined($opt_d));
-$focus_condition_enabled = (! $opt_c) if (defined($opt_c));
-$translateContractions = (!$opt_t) if (defined($opt_t));
-if (defined($opt_n)){
-    $translateNonlexemes = (!$opt_n);
-    $deleteNonspeech = (!$opt_n);
-    $deleteAcousticnoise = (!$opt_n);
-}
 if (defined($opt_k)){
     $keep_exclude_text = $opt_k;
     die "${USAGE}Error: option -k only valid with option -p"
-	if (!defined($opt_p));
+			unless ($process_overlap);
 }
-
-if (defined($opt_f)){
-    ($format = $opt_f) =~ tr/a-z/A-Z/;
-    die "${USAGE}Error: Unknown format '$format'" if ($format !~ /^(IESTM|STM|IECTM|CTM|IESM|SM)$/);
-}
-if (defined($opt_e)){
-    die "Error: DTD file '$opt_e' is not a readable file" if (! -r $opt_e);
-    $dtd_file = $opt_e;
-}
-if (defined($opt_i)){
-    die "Error: Input file '$opt_i' is not a readable file" if (! -r $opt_i);
-    $input = $opt_i;
-}
-$NSGMLS = $opt_s if (defined($opt_s));
 
 # check command line arguments
 #
-die "${USAGE}Error: Output format required" if (!defined($opt_f));
-die "${USAGE}Error: Output file required" if (!defined($opt_o));
-die "${USAGE}Error: Input UTF file required" if (!defined($opt_i));
-die "${USAGE}Error: SGML DTD file required" if (!defined($opt_e));
+die "${USAGE}Error: Output format required" unless (defined($format));
+die "${USAGE}Error: Output file required" unless (defined($output));
+die "${USAGE}Error: Input UTF file required" unless (defined($input));
+die "${USAGE}Error: SGML DTD file required" unless (defined($dtd_file));
 
 die ("$USAGE") if ($display_help) ;
 die ("ERROR: use -w only with IECTM format\n") 
@@ -399,18 +403,27 @@ die ("ERROR: use -w only with IECTM format\n")
 
 # open files
 #
-open(IN, "cat $dtd_file $input | $NSGMLS |") or 
+open(my $IN, "$cat_ $dtd_file $input | $nsgmls |") or 
     die("Unable to open nsgmls parsed data $input");
-binmode IN;
+binmode($IN);
 
-open (OUT, ">$output") or die ("Unable to open $output for writing\n");
-binmode OUT;
+open(my $OUT, ">$output") or die ("Unable to open $output for writing\n");
+binmode($OUT);
 
 # allocate an object of SGMLS class 
 #
-$this_parse = new SGMLS(IN);
+my $this_parse = new SGMLS($$IN);
 
-while ($this_event = $this_parse->next_event) {
+our (
+	$type, $data, $key, @stack, $i, $j, @a, $temp_key, %tmp_turn, $kept_text,
+	$tmp_str, @tmp_data1, $word, $tag, $val, $parenthesize_text, $jword,
+	$newtext, $attrib, $norm_tag, $starttime_tag, $starttime, $endtime_tag,
+	$endtime, $mlevel, $slevel, $olevel, $bkgrnd_prev_stime, $btime_i, $etime_i,
+	$chan_i, $btime_j, $etime_j, $chan_j, @return_val, @status, $fp, $cat,
+	$dialect, $fidelity, $mode, $music_lvl, $speech_lvl, $other_lvl, $focus_cond,
+	%ah, %bh, $temp_focus_cond, @num_words, $duration, $max, $min, $prev_stime,
+	$prev_etime, $stime, $num_words);
+while (my $this_event = $this_parse->next_event) {
     local $type = $this_event->type;
     local $data = $this_event->data;
 
@@ -639,8 +652,8 @@ if ($conformance == 0) {
 
 # close input and output files
 #
-close (IN);
-close (OUT);
+close ($IN);
+close ($OUT);
 
 # exit normally
 #
@@ -709,7 +722,7 @@ sub proc_end_utf{
 
     # print the content of the stack
     #
-    &proc_print_stack(OUT, $format, *sorted_section_stack);
+    &proc_print_stack($OUT, $format, *sorted_section_stack);
 }
 
 sub proc_beg_episode{

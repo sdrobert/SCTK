@@ -41,7 +41,7 @@ GetOptions(
       unless (-f $opt_value);
     $dtd = File::Spec->canonpath($opt_value);
   }
-) or die "$usage";
+) or die "${usage}Error: could not parse options";
 
 unless (defined($outdir)) {
   $outdir = File::Temp->newdir();
@@ -53,7 +53,7 @@ if (defined($dtd)) {
 
 sub run_test {
   my ($name, $cmd, $exp) = @_;
-  print "Beginning $name: $cmd\n";
+  print "Beginning $name\n";
   $exp = File::Spec->catfile($indir, $exp);
   my $act = File::Spec->catfile($outdir, basename($exp).".act");
   open(my $act_fh, '>', $act);
