@@ -6,6 +6,7 @@
 
 void do_exit(char *desc, char *prog, int ret);
 void proc_args(int argc, char **argv, char *prog, char **rname, char **rfmt, char **hname, char **hfmt, int *nhyps,  enum id_types *id_type, int *case_sens, int *outputs, char **title, int *feedback, int *linewidth, int *use_diff, char **out_dir, char **out_name,int *char_align, int *pipeout, int *pipein, int *infered_wordseg, char **lexicon, int *frag_correct, int *opt_del, int *inf_flags, int *stm2ctm_reduce, int *time_align, int *conf_outputs, int *left_to_right, char **wwl_file, char **lm_file);
+int TEXT_set_lang_prof(char *lprof);
 
 #define OUT_SUM            0x0001
 #define OUT_RSUM           0x0002
@@ -44,7 +45,7 @@ char *usage = "%s: <OPTIONS>\n"
 "    -e gb|euc|utf-8 [ case-conversion-localization ]\n"
 "                Interpret characters as GB, EUC, utf-8, or the default, 8-bit ASCII.\n"
 "                Optionally, case conversion localization can be set to either 'generic',\n"
-"                'babel_turkish', or 'babel_vietnamese'\n"  
+"                'babel_turkish', or 'babel_vietnamese', 'ukranian'\n"  
 "Alignment Options:\n"
 "    -s          Do Case-sensitive alignments.\n"
 "    -d          Use GNU diff for alignments.\n"
@@ -180,7 +181,7 @@ int main(int argc, char **argv){
 	      if (hroot-hypname[nh] + 1 > hdirLen){
 		expand_singarr_to_size(hdir,(hroot-hypname[nh]),hdirLen,hroot-hypname[nh]+1,TEXT);
 	      }
-	      TEXT_strBcpy(hdir,hypname[nh],hroot-hypname[nh]);
+	      TEXT_strBcpy((TEXT *)hdir,(TEXT *)hypname[nh],hroot-hypname[nh]);
 	      hroot++;
 	    } else {
 		hroot = hypname[nh];
@@ -197,7 +198,7 @@ int main(int argc, char **argv){
 	      if (outrootLen < TEXT_strlen((TEXT *)name)+1){
 		expand_singarr(outroot,TEXT_strlen((TEXT *)name),outrootLen,1.5,TEXT);
 	      }
-              TEXT_strcpy(outroot, name);	      
+              TEXT_strcpy(outroot, (TEXT *)name);	      
 	    }
 	    if (strcmp(reffmt,"trn") == 0 && strcmp(hypfmt[nh],"trn") == 0)
 		if (!use_diff)
@@ -264,19 +265,19 @@ int main(int argc, char **argv){
 	} else { /* input came from piped input */
 	    /* Set up the output root name */
 	    if ((hroot = strrchr(scor[nsc]->title,'/')) != NULL){
-		strncpy(hdir,scor[nsc]->title,hroot-scor[nsc]->title);
+		strncpy((char *)hdir,scor[nsc]->title,hroot-scor[nsc]->title);
 		hdir[hroot-scor[nsc]->title] = '\0';
 		hroot++;
 	    } else {
 		hroot = scor[nsc]->title;
-		strcpy(hdir,".");
+		strcpy((char *)hdir,".");
 	    }
 	    if ((out_dir != (char *)0) ||
 		strcmp(((out_dir != (char *)0) ? out_dir : (char *)hdir),".") != 0)
-	      sprintf(outroot,"%s/%s",((out_dir != (char *)0) ? out_dir : (char *)hdir),
+	      sprintf((char *)outroot,"%s/%s",((out_dir != (char *)0) ? out_dir : (char *)hdir),
 		      (out_name != (char *)0) ? out_name : hroot);
 	    else
-	      sprintf(outroot,"%s",(out_name != (char *)0) ? out_name : hroot);
+	      sprintf((char *)outroot,"%s",(out_name != (char *)0) ? out_name : hroot);
 	}	    
 	
 	if (BF_isSET(outputs,OUT_SUM))
@@ -355,16 +356,16 @@ int main(int argc, char **argv){
 	    if (fp != stdout) fclose(fp);
 	}
 	if (BF_isSET(conf_outputs,CONF_OUT_DET))
-	  if (make_SCORES_DET_curve(&(scor[nsc]),1,outroot,feedback,"") != 0)
+	  if (make_SCORES_DET_curve(&(scor[nsc]),1,(char *)outroot,feedback,"") != 0)
 	    errors++;
 	if (BF_isSET(conf_outputs,CONF_OUT_BHIST))
-	    if (make_binned_confidence(scor[nsc],outroot,feedback) != 0)
+	  if (make_binned_confidence(scor[nsc],(char *)outroot,feedback) != 0)
 	        errors++;
 	if (BF_isSET(conf_outputs,CONF_OUT_HIST))
-  	    if (make_confidence_histogram(scor[nsc],outroot,feedback) != 0)
+	  if (make_confidence_histogram(scor[nsc],(char *)outroot,feedback) != 0)
 	        errors++;
 	if (BF_isSET(conf_outputs,CONF_OUT_SBHIST))
-	    if (make_scaled_binned_confidence(scor[nsc],outroot,20,feedback) != 0)
+	  if (make_scaled_binned_confidence(scor[nsc],(char *)outroot,20,feedback) != 0)
 	        errors++;
 	
     }
@@ -378,11 +379,12 @@ int main(int argc, char **argv){
         SCORES_free(scor[nsc]);
     if (wwl != (WWL *)0) free_WWL(&wwl);
 
-    if (feedback >= 1) 
+    if (feedback >= 1) {
         if (errors == 0)
 	    printf("\nSuccessful Completion\n");
 	else
   	    printf("\nUnsuccessful Completion\n");
+    }
     return(0);
 }
 
