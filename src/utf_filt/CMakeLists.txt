@@ -9,8 +9,8 @@ option(
 )
 
 set(TESTING_UTF_DEFAULT ON CACHE BOOL "" FORCE)
-set(TRP_PATH "" CACHE STRING "" FORCE)
-mark_as_advanced(TESTING_UTF_DEFAULT TRP_PATH)
+set(SGMLS_PATH "" CACHE STRING "" FORCE)
+mark_as_advanced(TESTING_UTF_DEFAULT SGMLS_PATH)
 
 find_program(NSGMLS NAMES nsgmls onsgmls DOC "Path to (o)nsgmls executable")
 if (NOT NSGMLS)
@@ -31,35 +31,35 @@ if (NOT NSGMLS)
     )
   endif()
 endif()
-message(STATUS "Checking for perl module Tag::Reader::Perl")
+message(STATUS "Checking for perl module SGMLS")
 if (TESTING_UTF_FILT)
-  if (NOT TRP_PATH)
+  if (NOT SGMLS_PATH)
     execute_process(
-      COMMAND ${PERL_EXECUTABLE} -MTag::Reader::Perl -e "print \$INC{\"Tag/Reader/Perl.pm\"}"
-      RESULT_VARIABLE TRP_RETCODE
-      OUTPUT_VARIABLE TRP_PATH
+      COMMAND ${PERL_EXECUTABLE} -MSGMLS -e "print \$INC{\"SGMLS.pm\"}"
+      RESULT_VARIABLE SGMLS_RETCODE
+      OUTPUT_VARIABLE SGMLS_PATH
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_QUIET
     )
   endif()
-  if (TRP_RETCODE EQUAL 0)
-    message(STATUS "Checking for perl module Tag::Reader::Perl - found at ${TRP_PATH}")
+  if (SGMLS_RETCODE EQUAL 0)
+    message(STATUS "Checking for perl module SGMLS - found at ${SGMLS_PATH}")
   else()
     set(TESTING_UTF_DEFAULT OFF)
-    set(TRP_PATH "")
+    set(SGMLS_PATH "")
     if (FORCE_UTF_FILT)
       message(
         WARNING
-        "Perl module Tag::Reader::Perl could not be found. \
+        "Perl module SGMLS could not be found. \
         FORCE_UTF_FILT is true so we will continue, but you'll likely run \
         into errors if you try to run utf_filt.pl later."
       )
-      set(TRP_PATH "Tag::Reader::Perl")
+      set(SGMLS_PATH "SGMLS")
     else()
       message(
         FATAL_ERROR
-        "Perl module Tag::Reader::Perl could not be found. \
-        Either install the module (e.g. 'cpanm Tag::Reader::Perl') or force installation \
+        "Perl module SGMLS could not be found. \
+        Either install the module or force installation \
         to continue with -DFORCE_UTF_FILT=ON."
       )
     endif()
