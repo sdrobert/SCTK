@@ -13,6 +13,7 @@ if (ASCLITE_TESTING)
       COMMAND ${PERL_EXECUTABLE} ascliteTest.pl
         -a $<TARGET_FILE:asclite>
         -b $<TARGET_FILE:sclite>
+        -o ${CMAKE_CURRENT_BINARY_DIR}/out
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testfiles)
   endif()
 endif()

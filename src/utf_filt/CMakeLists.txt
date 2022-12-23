@@ -8,11 +8,13 @@ option(
   OFF
 )
 
-set(TESTING_UTF_DEFAULT ON CACHE BOOL "" FORCE)
-set(SGMLS_PATH "" CACHE STRING "" FORCE)
-mark_as_advanced(TESTING_UTF_DEFAULT SGMLS_PATH)
+# set(TESTING_UTF_DEFAULT ON CACHE BOOL "" FORCE)
+# set(SGMLS_PATH "" CACHE STRING "" FORCE)
+# mark_as_advanced(TESTING_UTF_DEFAULT SGMLS_PATH)
 
-find_program(NSGMLS NAMES nsgmls onsgmls DOC "Path to (o)nsgmls executable")
+if (NOT NSGMLS)
+  find_program(NSGMLS NAMES nsgmls onsgmls DOC "Path to (o)nsgmls executable")
+endif()
 if (NOT NSGMLS)
   set(TESTING_UTF_DEFAULT OFF)
   if (FORCE_UTF_FILT)

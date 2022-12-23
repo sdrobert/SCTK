@@ -19,10 +19,10 @@ use Getopt::Long;
 use File::Spec;
 use File::Compare qw(compare_text);
 
-my $scliteCom = "../../sclite/sclite";
-my $ascliteCom = "../core/asclite";
-my $compatOutDir = "scliteCompatTestOutDir";
-my $ascliteTestOutDir = "ascliteTestOutDir";
+my $scliteCom = "sclite";
+my $ascliteCom = "asclite";
+my $compatOutDir = my $compatInDir = "scliteCompatTestOutDir";
+my $ascliteTestOutDir = my $ascliteTestInDir = "ascliteTestOutDir";
 my $failure = 0;
 my $perl = $Config{perlpath};
 
@@ -36,11 +36,31 @@ sub ok_quit { print(join(' ', @_), "\n"); &ok_exit(); }
 my $Usage = "Usage: $0 -s (all|sastt|std|mdm04|mdm04ByFile|cts04|mdmVariations|passed|notpassed|todebug) [ -m ]\n";
 my $suite = "std";
 my $bigMem = 0;
-my $result = GetOptions("s=s" => \$suite, "m" => \$bigMem, "a=s" => \$ascliteCom, "b=s" => \$scliteCom);
-&error_quit("Aborting:\n$Usage\n") if (!$result);
+GetOptions(
+    "s=s" => \$suite,
+    "m" => \$bigMem,
+    "a=s" => sub {
+      my ($opt_name, $opt_value) = @_;
+      die "Error -$opt_name expected existing exectuable, got $opt_value"
+        unless (-x $opt_value);
+      $ascliteCom = File::Spec->rel2abs(File::Spec->canonpath($opt_value))
+    },
+    "b=s" => sub {
+      my ($opt_name, $opt_value) = @_;
+      die "Error -$opt_name expected existing exectuable, got $opt_value"
+        unless (-x $opt_value);
+      $scliteCom = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
+    },
+    "o=s" => sub {
+      my ($opt_name, $opt_value) = @_;
+      die "Error -$opt_name expected directory name, got $opt_value"
+        unless (-d $opt_value || mkdir($opt_value));
+      $compatOutDir = $ascliteTestOutDir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
+    }
+) or &error_quit("Aborting:\n$Usage\n");
 
-$scliteCom = File::Spec->canonpath($scliteCom);
-$ascliteCom = File::Spec->canonpath($ascliteCom);
+# $scliteCom = File::Spec->canonpath($scliteCom);
+# $ascliteCom = File::Spec->canonpath($ascliteCom);
 
 my $perl_pipe;
 my $nul = File::Spec->devnull();
@@ -143,28 +163,28 @@ sub RunCompatTest
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
 
-    if (! -f "$compatOutDir/$testId.sgml")
+    if (! -f "$compatInDir/$testId.sgml")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-        system "$scliteCom $opts $refOpts $hypOpts -o sgml stdout -f 3 | $perl_pipe > $compatOutDir/$testId.sgml";
+        system "$scliteCom $opts $refOpts $hypOpts -o sgml stdout -f 3 | $perl_pipe > $compatInDir/$testId.sgml";
     }
 
     print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
     my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
     my $ret = system "$com |  $perl_pipe > $compatOutDir/$testId.sgml.asclite";
 
-    check_result($testId, $com, $ret, "$compatOutDir/$testId.sgml", "$compatOutDir/$testId.sgml.asclite");
+    check_result($testId, $com, $ret, "$compatInDir/$testId.sgml", "$compatOutDir/$testId.sgml.asclite");
 }
 
 sub RunAscliteTest
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
 
-    if (! -f "$ascliteTestOutDir/$testId.sgml")
+    if (! -f "$ascliteTestInDir/$testId.sgml")
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-        print "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $ascliteTestOutDir/$testId.sgml";
-        system "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $ascliteTestOutDir/$testId.sgml";
+        print "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $ascliteTestInDir/$testId.sgml";
+        system "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $ascliteTestInDir/$testId.sgml";
     }
     else
     {
@@ -172,7 +192,7 @@ sub RunAscliteTest
         my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
         my $ret = system "$com |  $perl_pipe > $ascliteTestOutDir/$testId.sgml.asclite";
 
-        check_result($testId, $com, $ret, "$ascliteTestOutDir/$testId.sgml", "$ascliteTestOutDir/$testId.sgml.asclite");
+        check_result($testId, $com, $ret, "$ascliteTestInDir/$testId.sgml", "$ascliteTestOutDir/$testId.sgml.asclite");
     }
 }
 
