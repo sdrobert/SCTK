@@ -77,7 +77,7 @@ sub compare_files {
   #    Exclude any lines from the diff matching these expressions
   my ($test_id, $relative_path, $exp_root, $act_root) = @_;
   # the -x stuff
-  return 1 if ($relative_path =~ /^(|.*\/)(CVS|\.DS_Store|.*lur|log)(\/.*|)$/);
+  return 1 if ($relative_path =~ /^(|.*\/)(CVS|\.DS_Store|.*lur|log)(\/.*|)$/i);
   my $filtered_exp = File::Temp->new();
   my $filtered_act = File::Temp->new();
   open(my $unfiltered_exp, "<", "$exp_root/$relative_path")
@@ -172,22 +172,22 @@ unless (-d "$outdir") {
 # we make this an eval block so we can move out of the temp
 # directory
 eval {
-  # run_test(
-  #   "test1-sastt",
-  #   "$prefix -G -f rttm -F rttm -a -l english -h sastt",
-  #   "$indir/example.glm",
-  #   "$indir/sastt-case1.ref.rttm",
-  #   "$expdir/test1-sastt.base",
-  #   ("$indir/sastt-case1.sys.rttm")
-  # );
-  # run_test(
-  #   "test2-sastt",
-  #   "$prefix -G -f rttm -F rttm -a -l english -h sastt",
-  #   "$indir/example.glm",
-  #   "$indir/sastt-case2.ref.rttm",
-  #   "$expdir/test2-sastt.base",
-  #   ("$indir/sastt-case2.sys.rttm")
-  # );
+  run_test(
+    "test1-sastt",
+    "$prefix -G -f rttm -F rttm -a -l english -h sastt",
+    "$indir/example.glm",
+    "$indir/sastt-case1.ref.rttm",
+    "$expdir/test1-sastt.base",
+    ("$indir/sastt-case1.sys.rttm")
+  );
+  run_test(
+    "test2-sastt",
+    "$prefix -G -f rttm -F rttm -a -l english -h sastt",
+    "$indir/example.glm",
+    "$indir/sastt-case2.ref.rttm",
+    "$expdir/test2-sastt.base",
+    ("$indir/sastt-case2.sys.rttm")
+  );
   run_test(
     "test1-notag",
     "$prefix -l english -h hub5",

@@ -24,29 +24,27 @@
 
 AlignedSpeech::AlignedSpeech(Speech* speech)
 {
-	m_segments = map <Segment*,  AlignedSegment* >();
+	m_refToSegments = map <Segment*,  AlignedSegment* >();
 	m_speech = speech;
 }
 
 AlignedSpeech::~AlignedSpeech()
 {
-	map< Segment*,  AlignedSegment* >::iterator i, ei;
+	vector< AlignedSegment* >::iterator i, ei;
 	
 	i = m_segments.begin();
 	ei = m_segments.end();
 	
 	while(i != ei)
 	{
-		AlignedSegment* ptr_elt = i->second;
+		AlignedSegment* ptr_elt = *(i++);
 		
 		if(ptr_elt)
 			delete ptr_elt;
-		
-		++i;
 	}
 	
 	m_segments.clear();
-
+	m_refToSegments.clear();
 }
 
 AlignedSegment* AlignedSpeech::GetOrCreateAlignedSegmentFor(Segment* segment, const bool& doCreate)
@@ -57,12 +55,13 @@ AlignedSegment* AlignedSpeech::GetOrCreateAlignedSegmentFor(Segment* segment, co
 		return NULL;
 	}
 	
-	AlignedSegment* result = m_segments[segment];
+	AlignedSegment* result = m_refToSegments[segment];
     
 	if(result == NULL && doCreate)
     {
 		result = new AlignedSegment(segment);
-		m_segments[segment] = result;
+		m_refToSegments[segment] = result;
+		m_segments.push_back(result);
 	}
     
 	return result;

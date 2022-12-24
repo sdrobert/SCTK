@@ -79,7 +79,8 @@ class Alignment
 		//ulint GetsSegGrpID() { return s_seggrp_id; }
 			
     private:
-        map< Speech* , AlignedSpeech* > m_references;
+        vector< AlignedSpeech * > m_references;
+        map< Speech* , AlignedSpeech* > m_refToReferences;
         vector<string> systems;
         vector<string> systemFilenames;
 	

@@ -25,7 +25,7 @@
 
 class AlignedSpeechIterator {
 private:
-	map< Speech*, AlignedSpeech* >::iterator m_current, m_end;
+	vector<  AlignedSpeech* >::const_iterator m_current, m_end;
 public:
 	AlignedSpeechIterator(Alignment* alignment);
 	~AlignedSpeechIterator() {};

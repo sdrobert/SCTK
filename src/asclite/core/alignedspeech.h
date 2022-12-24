@@ -52,8 +52,9 @@ class AlignedSpeech
         string ToString();
 	
     private:
-            map< Segment*,  AlignedSegment* > m_segments;
-            Speech* m_speech;
+        vector< AlignedSegment* > m_segments;
+        map< Segment*,  AlignedSegment* > m_refToSegments;
+        Speech* m_speech;
 };
 
 #endif

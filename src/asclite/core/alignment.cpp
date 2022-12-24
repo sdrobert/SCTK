@@ -28,27 +28,27 @@ Logger* Alignment::logger = Logger::getLogger();
 
 Alignment::Alignment()
 {
-	m_references = map< Speech*, AlignedSpeech* >();
+	m_references = vector< AlignedSpeech* >();
+	m_refToReferences = map< Speech*, AlignedSpeech* >();
 }
 
 Alignment::~Alignment()
 {
-	map< Speech* , AlignedSpeech* >::iterator i, ei;
+	vector< AlignedSpeech* >::const_iterator i, ei;
 	
 	i = m_references.begin();
 	ei = m_references.end();
 	
 	while(i !=ei)
 	{
-		AlignedSpeech* ptr_elt = i->second;
+		AlignedSpeech* ptr_elt = *(i++);
 		
 		if(ptr_elt)
 			delete ptr_elt;
-		
-		++i;
 	}
 	
 	m_references.clear();
+	m_refToReferences.clear();
 	systems.clear();
 }
 
@@ -68,12 +68,13 @@ string Alignment::ToString()
 
 AlignedSpeech* Alignment::GetOrCreateAlignedSpeechFor(Speech* referenceSpeech, const bool& doCreate)
 {
-	AlignedSpeech* result = m_references[referenceSpeech];
+	AlignedSpeech* result = m_refToReferences[referenceSpeech];
     
 	if(result == NULL && doCreate)
     {
 		result = new AlignedSpeech(referenceSpeech);
-		m_references[referenceSpeech] = result;
+		m_refToReferences[referenceSpeech] = result;
+		m_references.push_back(result);
 	}
     
 	return result;

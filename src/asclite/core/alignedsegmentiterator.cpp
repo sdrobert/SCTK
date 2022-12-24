@@ -27,8 +27,7 @@ bool AlignedSegmentIterator::Current(AlignedSegment** current)
 {
 	if(m_current != m_end)
 	{
-		*current = m_current->second;
-		++m_current;
+		*current = *(m_current++);
 		return true;
 	}
 	

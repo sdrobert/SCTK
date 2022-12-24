@@ -26,7 +26,7 @@
 class AlignedSegmentIterator
 {
 	private:
-		map<Segment*, AlignedSegment*>::iterator m_current, m_end;
+		vector<AlignedSegment*>::const_iterator m_current, m_end;
 	
 	public:
 		AlignedSegmentIterator(AlignedSpeech* alignedSpeech);
