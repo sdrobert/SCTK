@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 #
-#  File:  csrfilt.sh
+#  File:  csrfilt.pl
 #  Date:  April 9, 2021
 #  Usage: csrfilt.pl global-map-file [ utterance-map-file ] < infile > outfile
 #         Filter the input for stdin, and write the output to stdout
