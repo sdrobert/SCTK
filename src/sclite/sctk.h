@@ -15,6 +15,12 @@
 #include <time.h>
 #include <math.h>
 
+#ifdef _MSC_VER
+// XXX(sdrobert): This is necessary for consistency with glibc's "banker's
+// rounding," but only works for newer toolkits.
+#pragma fenv_access(on)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,6 +38,7 @@ extern "C" {
 
 #include "netstr1.h"
 #include "llist.h"
+
 
 #define db_enter_msg(_s,_db) {if (_db < db_level) printf("DB: Entering %s\n",_s);}
 #define db_leave_msg(_s,_db) {if (_db < db_level) printf("DB: Leaving  %s\n",_s);}

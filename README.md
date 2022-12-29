@@ -144,3 +144,10 @@ If you have questions, please address them to Jonathan Fiscus at <jonathan.fiscu
 ## License
 
 See LICENSE.md for details or <http://www.nist.gov/open/license.cfm>
+
+## Known issues
+
+Earlier versions of MSVC will error on the hubscr tests due to differences in
+rounding defaults ("banker's rounding" vs. always rounding up). This is only
+a problem for very specific numbers. To avoid it, consider using updated
+toolkits (i.e > 2019).

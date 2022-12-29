@@ -104,7 +104,7 @@ sub compare_files {
   if (compare_text($filtered_exp->filename, $filtered_act->filename)) {
     print "$test_id failed: diff {$exp_root,$act_root}/$relative_path below\n";
     system "diff", $filtered_exp->filename, $filtered_act->filename;
-    die;
+    return 0;
   }
   return 1;
 }
@@ -115,23 +115,30 @@ sub compare_directories {
     or die "$test_id error: could not open $exp_root/$relative_path as a directory";
   my @fns = readdir $dh;
   closedir($dh);
+  my $rv = 1;
   foreach my $fn (@fns) {
     next if ($fn =~ /^\.+$/);
     my $new_relative = join("/", $relative_path, $fn);
-    die unless (-d "$exp_root/$new_relative" || compare_files($test_id, $new_relative, $exp_root, $act_root));
-    die unless (-f "$exp_root/$new_relative" || compare_directories($test_id, $new_relative, $exp_root, $act_root));
+    if (-d "$exp_root/$new_relative") {
+      $rv *= compare_directories($test_id, $new_relative, $exp_root, $act_root);
+    } else {
+      $rv *= compare_files($test_id, $new_relative, $exp_root, $act_root);
+    }
   }
   opendir($dh, "$act_root/$relative_path")
     or die "$test_id error: could not open $exp_root/$relative_path as a directory";
-  @fns = readdir $dh;
+  my @fns2 = readdir $dh;
   closedir($dh);
-  foreach my $fn (@fns) {
-    next if ($fn =~ /^\.+$/);
+  foreach my $fn (@fns2) {
+    next if ($fn =~ /^\.+$/) or grep(/^$fn$/, @fns);
     my $new_relative = join("/", $relative_path, $fn);
-    die unless (-f "$act_root/$new_relative" || compare_directories($test_id, $new_relative, $exp_root, $act_root));
-    die unless (-d "$act_root/$new_relative" || compare_files($test_id, $new_relative, $exp_root, $act_root));
+    if (-d "$exp_root/$new_relative") {
+      $rv *= compare_directories($test_id, $new_relative, $exp_root, $act_root);
+    } else {
+      $rv *= compare_files($test_id, $new_relative, $exp_root, $act_root);
+    }
   }
-  return 1;
+  return $rv;
 }
 
 sub run_test {
@@ -223,9 +230,3 @@ eval {
 };
 chdir($base);
 die $@ if $@;
-# runIt($operation, "test1", "-V", "../test_suite/example.glm", "hub5", "english",
-#       "../test_suite/lvc_refe.stm",
-#       "../test_suite/lvc_hyp.ctm ../test_suite/lvc_hyp2.ctm");
-# runIt($operation, "testArb", "-V -H -T -d", "../test_suite/test.arb2004.glm", "hub5", "arabic",
-#       "../test_suite/test.arb2004.txt.stm",
-#       "../test_suite/test.arb2004.txt.ctm");
