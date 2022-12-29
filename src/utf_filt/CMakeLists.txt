@@ -72,7 +72,7 @@ option(TESTING_UTF_FILT "Whether to test utf_filt.pl" ${TESTING_UTF_DEFAULT})
 
 configure_file(utf_filt.pl.in utf_filt.pl @ONLY)
 
-install(FILES utf_filt.pl TYPE BIN)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/utf_filt.pl TYPE BIN)
 
 if (TESTING_UTF_FILT)
   add_test(

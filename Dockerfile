@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.14
 
 LABEL Description="NIST Speech Recognition Scoring Toolkit (SCTK)"
 
@@ -7,18 +7,18 @@ RUN apk add --update \
     alpine-sdk \
     git \
     perl \
+    'cmake>3.15' \
  && rm -rf /var/cache/apk/*
 
 WORKDIR /opt
 
 # Build and install all SCTK tools
-RUN git clone https://github.com/usnistgov/SCTK \
+RUN git clone -b cmake https://github.com/sdrobert/SCTK \
  && cd SCTK \
- && make config \
- && make all \
- && make install \
- && make clean \
- && cp ./bin/* /usr/local/bin/
+ && cmake --version \
+ && cmake -S . -B build -DFORCE_UTF_FILT=ON -DCMAKE_BUILD_TYPE=Release \
+ && cd build \
+ && make install
 
 WORKDIR /var/sctk
 
