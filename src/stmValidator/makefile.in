@@ -2,6 +2,7 @@
 SHELL = /bin/sh
 PREFIX=
 bindir = $(PREFIX)/bin
+T = test_suite
 
 all: stmValidator.pl
 
@@ -9,8 +10,13 @@ stmValidator.pl: stmValidator-main.pl buildInstallVersion.pl STMList.pl STMRecor
 	perl buildInstallVersion.pl > stmValidator.pl
 	chmod +x stmValidator.pl
 
+setTests: all
+	@perl StmValidatorTests.pl -i $(T) -s
+
 check: all
-	(cd test_suite; $(SHELL) RunTest.sh ../stmValidator.pl)
+	@echo "Testing stmValidator.pl"
+	@perl StmValidatorTests.pl -i $(T)
+	@echo "   stmValidator.pl tests successfully completed"
 
 install: all
 	perl buildInstallVersion.pl > $(DESTDIR)$(bindir)/stmValidator.pl

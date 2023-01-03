@@ -148,7 +148,7 @@ sub BuildPNG
 {
 	my ($data, $filename, $title) = @_;
 
-	if($GNUPLOT eq "")
+	unless (defined($GNUPLOT))
 	{
 		print "PNG: 'gnuplot not found' - no PNG generated. Install 'gnuplot' to have the PNGs.\n";
 		return;

@@ -21,6 +21,7 @@ my $outdir;
 my $indir = ".";
 my $perl = $Config{perlpath};
 my $dtd;
+my $set_test = 0;
 
 GetOptions(
   "o=s" => sub {
@@ -40,7 +41,8 @@ GetOptions(
     die "Error -$opt_name expected existing file, got $opt_value"
       unless (-f $opt_value);
     $dtd = File::Spec->canonpath($opt_value);
-  }
+  },
+  "s" => \$set_test
 ) or die "${usage}Error: could not parse options";
 
 unless (defined($outdir)) {
@@ -51,22 +53,27 @@ if (defined($dtd)) {
   $dtd = "-e $dtd";
 }
 
+
 sub run_test {
   my ($name, $cmd, $exp) = @_;
-  print "Beginning $name\n";
+  print "   Beginning $name\n";
   $exp = File::Spec->catfile($indir, $exp);
-  my $act = File::Spec->catfile($outdir, basename($exp).".act");
+  my $act = $set_test ? $exp : File::Spec->catfile($outdir, basename($exp).".act");
   open(my $act_fh, '>', $act);
   print $act_fh `$cmd`;
   die("Command failed!") if ($?);
   # die "$name error: $!" if $?;
-  close($act_fh);
-  if (compare_text($exp, $act)) {
-    print "$name failed\n";
-    system "diff", $exp, $act;
-    die;
+  unless ($set_test) {
+    close($act_fh);
+    if (compare_text($exp, $act)) {
+      print "   $name failed\n";
+      system "diff", $exp, $act;
+      die;
+    } else {
+      print "   $name passed\n";
+    }
   } else {
-    print "$name passed\n";
+    print "   Wrote $name to $act\n";
   }
 }
 

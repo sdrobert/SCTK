@@ -4,6 +4,7 @@
 MAKE=make
 PREFIX=../..
 bindir=$(PREFIX)/bin
+T=../test_suite
 
 all: slatreport.pl
 
@@ -18,9 +19,12 @@ config:
 		echo `which gnuplot`; \
 	fi
 
+setTests: all
+	@perl slatTest.pl -i $(T) -s
+
 check: all
 	@echo "Testing slatreport.pl"
-	./slatTest.pl
+	@perl slatTest.pl -i $(T)
 	@echo "   slatreport.pl tests successfully completed"
 
 install: all

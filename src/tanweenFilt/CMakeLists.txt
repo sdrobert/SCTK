@@ -12,5 +12,6 @@ if (TESTING_TANWEEN_FILT)
     NAME test_tanween_filt
     COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/TanweenFiltTests.pl
       -i ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite
+      -o out
   )
 endif()
