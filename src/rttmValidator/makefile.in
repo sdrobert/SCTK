@@ -1,14 +1,21 @@
 SHELL = /bin/sh
 PREFIX=
 bindir = $(PREFIX)/bin
+T = test_suite
 
 all: rttmValidator.pl
 
 rttmValidator.pl:
 	chmod +x rttmValidator.pl
 
+setTests: all
+	@perl RttmValidatorTests.pl -i $(T) -w
+
 check: all
-	(cd test_suite; $(SHELL) RunTest.sh ../rttmValidator.pl)
+	@echo "Testing rttmValidator.pl"
+	@perl RttmValidatorTests.pl -i $(T)
+	@echo "   rttmValidator.pl tests successfully completed"
+
 
 install: all
 	cp rttmValidator.pl $(DESTDIR)$(bindir)

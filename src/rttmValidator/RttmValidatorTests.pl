@@ -14,11 +14,13 @@ my $usage = "Usage: $0 [<OPTIONS>]
 OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
   -i <dir>:  Directory where expected value files exist
+  -w:        Write expected values instead of comparing
 ";
 
 my $outdir;
 my $indir = ".";
 my $perl = $Config{perlpath};
+my $set_test = 0;
 
 GetOptions(
   "o=s" => sub {
@@ -32,7 +34,8 @@ GetOptions(
     die "Error -$opt_name expected existing directory, got $opt_value"
       unless (-d $opt_value);
     $indir = File::Spec->canonpath($opt_value);
-  }
+  },
+  "w" => \$set_test
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -41,23 +44,26 @@ unless (defined($outdir)) {
 
 sub run_test {
   my ($name, $cmd, $exp) = @_;
-  print "Beginning $name\n";
-  my $tmp = new File::Temp();
-  close($tmp);
+  print "   Beginning $name\n";
   $exp = File::Spec->catfile($indir, $exp);
-  # first have to filter out lines that contain RTTMValidator
-  system "$perl -ne \"print unless /RTTMValidator/;\" < $exp > $tmp";
-  my $act = File::Spec->catfile($outdir, basename($exp).".act");
+  my $act = $set_test ? $exp : File::Spec->catfile($outdir, basename($exp).".act");
   open(my $act_fh, '>', $act);
   print $act_fh `$cmd`;
-  # die "$name error: $!" if $?;
   close($act_fh);
-  if (compare_text($tmp->filename, $act)) {
-    print "$name failed\n";
-    system "diff", $tmp->filename, $act;
-    die;
+  unless ($set_test) {
+    # first have to filter out lines that contain RTTMValidator
+    my $tmp = new File::Temp();
+    close($tmp);
+    system "$perl -ne \"print unless /RTTMValidator/;\" < $exp > $tmp";
+    if (compare_text($tmp->filename, $act)) {
+      print "   $name failed\n";
+      system "diff", $tmp->filename, $act;
+      die;
+    } else {
+      print "   $name passed\n";
+    }
   } else {
-    print "$name passed\n";
+    print "   Wrote $name to $act\n";
   }
 }
 
@@ -67,7 +73,7 @@ for (my $i = 1; $i < 37; ++$i) {
   my $tn = sprintf("test%02d", $i);
   if (-f "$indir/$tn.rttm" && -f "$indir/$tn.log.saved") {
     if (-f "$indir/$tn.rttm.toskip") {
-      print "$tn skipped\n";
+      print "   $tn skipped\n";
     } else {
       run_test("$tn", "$prefix -i $indir/$tn.rttm | $perl -ne \"print unless /RTTMValidator/;\"", "$tn.log.saved");
     }
