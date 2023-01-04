@@ -15,6 +15,7 @@ CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 SLM_TARGETS = @SLM_TARGETS@
 LIBS = @LIBS@ $(SLM_TARGETS)
+T = testdata
 
 # Some System V machines do not come with libPW.
 # If this is true for you, use the GNU alloca.o here.
@@ -177,10 +178,16 @@ testinstalldirs:
 #	   fi \
 
 # We need more tests.
-check: sctkUnit
+check: sign sctkUnit mcnemar sclite sc_stats
+	./sign
 	./sctkUnit
-	cd testdata && ./tsclite.sh
-	cd testdata && ./tsc_stats.sh
+	./mcnemar
+	./ScliteTests.pl -i $(T) -s ./sclite
+	./ScStatsTests.pl -i $(T) -s ./sc_stats
+
+setTests: sclite sc_stats
+	./ScliteTests.pl -i $(T) -s ./sclite -w
+	./ScStatsTests.pl -i $(T) -s ./sc_stats -w
 
 uninstall:
 	set -e; for p in $(PROGRAMS); do \

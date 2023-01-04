@@ -56,3 +56,5 @@ install
 .vscode
 autom4te.cache
 utf_filt.pl
+sign
+mcnemar

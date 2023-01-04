@@ -323,7 +323,7 @@ my $translateNonlexemes = 1;
 my $deleteNonspeech = 1;
 my $deleteAcousticnoise = 1;
 my $nsgmls;
-if ("@NSGMLS@" eq "nsgmls-NOTFOUND") {
+if ("@NSGMLS@" eq "NSGMLS-NOTFOUND") {
 	$nsgmls = "nsgmls";  # hope it's there later!
 } else {
 	$nsgmls = "@NSGMLS@";

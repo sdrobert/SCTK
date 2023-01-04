@@ -15,6 +15,7 @@ OPTIONS
   -i <dir>:  Directory where expected value files exist
   -e <path>: Path to utf-1.2.dtd. If unset, assumed to be at directory above
              expected value files
+  -w:        Write expected values instead of comparing
 ";
 
 my $outdir;
@@ -42,7 +43,7 @@ GetOptions(
       unless (-f $opt_value);
     $dtd = File::Spec->canonpath($opt_value);
   },
-  "s" => \$set_test
+  "w" => \$set_test
 ) or die "${usage}Error: could not parse options";
 
 unless (defined($outdir)) {

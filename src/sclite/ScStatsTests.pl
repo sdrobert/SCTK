@@ -18,6 +18,7 @@ OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
   -i <dir>:  Directory where expected value files exist
   -s <path>: Path to sc_stats executable
+  -w:        Write expected values instead of comparing
 ";
 
 my $has_diff = "";
@@ -28,7 +29,8 @@ my $sc_stats = "sc_stats";
 my $scl_flags = "";
 my $perl = $Config{perlpath};
 my $cat;
-if ("$^O" =~ /Win/) {
+my $set_test = 0;
+if ("$^O" =~ /win/i) {
     $cat = "type";
 } else {
     $cat = "cat";
@@ -53,6 +55,7 @@ GetOptions(
       unless (-x $opt_value);
     $sc_stats = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
   },
+  "w" => \$set_test
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -74,7 +77,7 @@ sub compare_files {
   my $filtered_exp = File::Temp->new();
   my $filtered_act = File::Temp->new();
   open(my $unfiltered_exp, "<", "$exp_root/$relative_path")
-    or die "$test_id failed: unable to open $exp_root/$relative_path";
+    or die "   Failed: unable to open $exp_root/$relative_path";
   while (<$unfiltered_exp>) {
     next if /Output written to/;
     print $filtered_exp $_;
@@ -82,7 +85,7 @@ sub compare_files {
   close($unfiltered_exp);
   close($filtered_exp);
   open(my $unfiltered_act, "<", "$act_root/$relative_path")
-    or die "$test_id failed: unable to open $act_root/$relative_path";
+    or die "   Failed: unable to open $act_root/$relative_path";
   while (<$unfiltered_act>) {
     next if /Output written to/;
     print $filtered_act $_;
@@ -90,7 +93,7 @@ sub compare_files {
   close($unfiltered_act);
   close($filtered_act);
   if (compare_text($filtered_exp->filename, $filtered_act->filename)) {
-    print "$test_id failed: diff {$exp_root,$act_root}/$relative_path below\n";
+    print "   Failed: diff {$exp_root,$act_root}/$relative_path below\n";
     system "diff", $filtered_exp->filename, $filtered_act->filename;
     die;
   }
@@ -100,7 +103,7 @@ sub compare_files {
 sub compare_directories {
   my ($test_id, $relative_path, $exp_root, $act_root) = @_;
   opendir(my $dh, "$exp_root/$relative_path")
-    or die "$test_id error: could not open $exp_root/$relative_path as a directory";
+    or die "   Error: could not open $exp_root/$relative_path as a directory";
   my @fns = readdir $dh;
   closedir($dh);
   foreach my $fn (@fns) {
@@ -110,7 +113,7 @@ sub compare_directories {
     die unless (-f "$exp_root/$new_relative" || compare_directories($test_id, $new_relative, $exp_root, $act_root));
   }
   opendir($dh, "$act_root/$relative_path")
-    or die "$test_id error: could not open $exp_root/$relative_path as a directory";
+    or die "   Error: could not open $exp_root/$relative_path as a directory";
   @fns = readdir $dh;
   closedir($dh);
   foreach my $fn (@fns) {
@@ -124,7 +127,7 @@ sub compare_directories {
 
 sub run_test {
   my ($name, $desc, $cmd, $req) = @_;
-  print "Beginning $name: $desc\n";
+  print "   Beginning $name: $desc\n";
   if (defined($req)) {
     if ($req eq "SLM" && not($has_slm)) {
       print "            **** SLM weighted alignment is disabled, not testing ***\n";
@@ -135,14 +138,17 @@ sub run_test {
       return 0;
     }
   }
-  my $act_dir = File::Spec->catfile($outdir, $name);
-  if (-d $act_dir) {
-    remove_tree($act_dir, {
-      safe => 1,
-      keep_root => 1
-    }) or die "Error $name: Could not clear $act_dir";
-  } else {
-    mkdir($act_dir) or die "Error $name: Could not create directory $act_dir: $!";
+  my $act_dir = "base_sc_stats";
+  unless ($set_test) {
+    $act_dir = File::Spec->catfile($outdir, $name);
+    if (-d $act_dir) {
+      remove_tree($act_dir, {
+        safe => 1,
+        keep_root => 1
+      }) or die "   Error $name: Could not clear $act_dir";
+    } else {
+      mkdir($act_dir) or die "   Error $name: Could not create directory $act_dir: $!";
+    }
   }
 
   $cmd .=
@@ -151,13 +157,17 @@ sub run_test {
     " 2> ".File::Spec->catfile($act_dir, "$name.err");
 
   system($cmd) == 0
-    or die "$name failed: exit code $?";
+    or die "   Failed: exit code $?";
 
-  compare_directories($name, ".", "base_sc_stats", $act_dir) or die;
+  unless($set_test) {
+    compare_directories($name, ".", "base_sc_stats", $act_dir) or die;
+  } else {
+    print "   Wrote $name to $act_dir\n";
+  }
 }
 
 unless (-d "$outdir") {
-  mkdir $outdir or die "Could not make directory";
+  mkdir $outdir or die "   Error: Could not make directory";
 }
 
 my $infix = "$sc_stats -p -t mapsswe -v";

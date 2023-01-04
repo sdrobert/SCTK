@@ -12,7 +12,7 @@ tanweenFilt.pl:
 	chmod +x tanweenFilt.pl
 
 setTests: all
-	@perl TanweenFiltTests.pl -i $(T) -s
+	@perl TanweenFiltTests.pl -i $(T) -w
 
 check: all
 	@echo "Testing tanweenFilt.pl"

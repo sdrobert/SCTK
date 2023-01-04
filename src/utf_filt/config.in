@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([utf_filt], [0.1])
 
 dnl Checks for programs.
-AC_CHECK_PROGS(NSGMLS, nsgmls onsgmls)
+AC_CHECK_PROGS(NSGMLS, nsgmls onsgmls, NSGMLS-NOTFOUND)
 
 AC_CONFIG_FILES([utf_filt.pl], [chmod +x utf_filt.pl])
 

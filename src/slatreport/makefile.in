@@ -20,7 +20,7 @@ config:
 	fi
 
 setTests: all
-	@perl slatTest.pl -i $(T) -s
+	@perl slatTest.pl -i $(T) -w
 
 check: all
 	@echo "Testing slatreport.pl"

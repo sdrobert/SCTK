@@ -13,7 +13,7 @@ utf_filt.pl:
 	@chmod +x utf_filt.pl
 
 setTests:
-	@perl UtfFiltTests.pl -i $(T) -e utf-1.2.dtd -s
+	@perl UtfFiltTests.pl -i $(T) -e utf-1.2.dtd -w
 
 check: all
 	@echo "Testing utf_filt.pl"
@@ -25,8 +25,7 @@ check: all
 	fi	
 
 install: all
-	@cp utf_filt.pl $(DESTDIR)$(bindir)/utf_filt.pl
-	@chmod +x $(DESTDIR)$(bindir)/utf_filt.pl
+	@cp utf_filt.pl $(DESTDIR)$(bindir)
 
 config.sh: config.in
 	@autoconf config.in > config.sh

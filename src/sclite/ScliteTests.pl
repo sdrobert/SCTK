@@ -21,6 +21,7 @@ OPTIONS
   -d:        If set, sclite was compiled with GNU diff support
   -t:        If set, sclite was compiled with the SLM toolkit
   -f <str>:  Additional flags to pass to sclite
+  -w:        Write expected values instead of comparing
 ";
 
 my $has_diff = "";
@@ -30,6 +31,7 @@ my $indir = ".";
 my $sclite = "sclite";
 my $scl_flags = "";
 my $perl = $Config{perlpath};
+my $set_test = 0;
 
 GetOptions(
   "o=s" => sub {
@@ -52,7 +54,8 @@ GetOptions(
   },
   "d" => \$has_diff,
   "t" => \$has_slm,
-  "f=s" => \$scl_flags
+  "f=s" => \$scl_flags,
+  "w" => \$set_test
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -60,7 +63,7 @@ unless (defined($outdir)) {
 }
 
 # some tests require this
-chdir($indir) or die "Could not move to directory $indir";
+chdir($indir) or die "   Error: Could not move to directory $indir";
 
 sub compare_files {
   # tsclite.sh applies the following options in its diff command:
@@ -73,7 +76,7 @@ sub compare_files {
   my $filtered_exp = File::Temp->new();
   my $filtered_act = File::Temp->new();
   open(my $unfiltered_exp, "<", "$exp_root/$relative_path")
-    or die "$test_id failed: unable to open $exp_root/$relative_path";
+    or die "   Failed: unable to open $exp_root/$relative_path";
   while (<$unfiltered_exp>) {
     # the -I stuff
     next if /[cC]reation[ _]date/;
@@ -82,7 +85,7 @@ sub compare_files {
   close($unfiltered_exp);
   close($filtered_exp);
   open(my $unfiltered_act, "<", "$act_root/$relative_path")
-    or die "$test_id failed: unable to open $act_root/$relative_path";
+    or die "   Failed: unable to open $act_root/$relative_path";
   while (<$unfiltered_act>) {
     next if /[cC]reation[ _]date/;
     print $filtered_act $_;
@@ -90,7 +93,7 @@ sub compare_files {
   close($unfiltered_act);
   close($filtered_act);
   if (compare_text($filtered_exp->filename, $filtered_act->filename)) {
-    print "$test_id failed: diff {$exp_root,$act_root}/$relative_path below\n";
+    print "   Failed: diff {$exp_root,$act_root}/$relative_path below\n";
     system "diff", $filtered_exp->filename, $filtered_act->filename;
     die;
   }
@@ -100,7 +103,7 @@ sub compare_files {
 sub compare_directories {
   my ($test_id, $relative_path, $exp_root, $act_root) = @_;
   opendir(my $dh, "$exp_root/$relative_path")
-    or die "$test_id error: could not open $exp_root/$relative_path as a directory";
+    or die "   Error: could not open $exp_root/$relative_path as a directory";
   my @fns = readdir $dh;
   closedir($dh);
   foreach my $fn (@fns) {
@@ -111,7 +114,7 @@ sub compare_directories {
     die unless (-f "$exp_root/$new_relative" || compare_directories($test_id, $new_relative, $exp_root, $act_root));
   }
   opendir($dh, "$act_root/$relative_path")
-    or die "$test_id error: could not open $exp_root/$relative_path as a directory";
+    or die "   Error: could not open $exp_root/$relative_path as a directory";
   @fns = readdir $dh;
   closedir($dh);
   foreach my $fn (@fns) {
@@ -125,7 +128,7 @@ sub compare_directories {
 
 sub run_test {
   my ($name, $desc, $cmd, $req) = @_;
-  print "Beginning $name: $desc\n";
+  print "   Beginning $name: $desc\n";
   if (defined($req)) {
     if ($req eq "SLM" && not($has_slm)) {
       print "            **** SLM weighted alignment is disabled, not testing ***\n";
@@ -136,14 +139,17 @@ sub run_test {
       return 0;
     }
   }
-  my $act_dir = File::Spec->catfile($outdir, $name);
-  if (-d $act_dir) {
-    remove_tree($act_dir, {
-      safe => 1,
-      keep_root => 1
-    }) or die "Error $name: Could not clear $act_dir";
-  } else {
-    mkdir($act_dir) or die "Error $name: Could not create directory $act_dir: $!";
+  my $act_dir = "base";
+  unless ($set_test) {
+    $act_dir = File::Spec->catfile($outdir, $name);
+    if (-d $act_dir) {
+      remove_tree($act_dir, {
+        safe => 1,
+        keep_root => 1
+      }) or die "   Error $name: Could not clear $act_dir";
+    } else {
+      mkdir($act_dir) or die "   Error $name: Could not create directory $act_dir: $!";
+    }
   }
 
   $cmd .=
@@ -157,7 +163,7 @@ sub run_test {
   foreach my $fn ("$act_dir/$name.sgml", "$act_dir/$name.nl.sgml") {
     next unless (-f $fn);
     my $tf = new File::Temp();
-    open(my $fh, "<", $fn) or die("Could not open '$fn'");
+    open(my $fh, "<", $fn) or die("   Error: Could not open '$fn'");
     while (<$fh>) {
       s/creation_date="[^"]*"//;
       print $tf $_;
@@ -167,7 +173,11 @@ sub run_test {
     copy($tf->filename, $fn);
   }
 
-  compare_directories($name, ".", "base", $act_dir) or die;
+  unless ($set_test) {
+    compare_directories($name, ".", "base", $act_dir) or die;
+  } else {
+    print "   Wrote $name to $act_dir\n";
+  }
 }
 
 unless (-d "$outdir") {

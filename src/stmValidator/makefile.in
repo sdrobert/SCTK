@@ -11,7 +11,7 @@ stmValidator.pl: stmValidator-main.pl buildInstallVersion.pl STMList.pl STMRecor
 	chmod +x stmValidator.pl
 
 setTests: all
-	@perl StmValidatorTests.pl -i $(T) -s
+	@perl StmValidatorTests.pl -i $(T) -w
 
 check: all
 	@echo "Testing stmValidator.pl"

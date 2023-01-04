@@ -14,6 +14,7 @@ my $usage = "Usage: $0 [<OPTIONS>]
 OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
   -i <dir>:  Directory where expected value files exist
+  -w:        Write expected values instead of comparing
 ";
 
 my $outdir;
@@ -34,7 +35,7 @@ GetOptions(
       unless (-d $opt_value);
     $indir = File::Spec->canonpath($opt_value);
   },
-  "s" => \$store_test
+  "w" => \$store_test
 ) or die "$usage";
 
 unless (defined($outdir)) {

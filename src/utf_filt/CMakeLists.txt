@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 project(SCTK_utf_filt)
 find_package(Perl REQUIRED)
+
 option(
   FORCE_UTF_FILT
   "Whether to force installation of utf_filt.pl, regardless of whether \
   nsgmls and the Perl module are available"
   OFF
 )
+option(TESTING_UTF_FILT "Whether to test utf_filt.pl" ${TESTING_UTF_DEFAULT})
 
 # set(TESTING_UTF_DEFAULT ON CACHE BOOL "" FORCE)
 # set(SGMLS_PATH "" CACHE STRING "" FORCE)
@@ -17,14 +19,7 @@ if (NOT NSGMLS)
 endif()
 if (NOT NSGMLS)
   set(TESTING_UTF_DEFAULT OFF)
-  if (FORCE_UTF_FILT)
-    message(
-      WARNING
-      "Neither the nsgnmls nor onsgmls executable was found.\
-      FORCE_UTF_FILT is true so we will continue, but you'll likely run \
-      into errors if you try to run utf_filt.pl later.")
-    set(NSGMLS "nsgmls")  # stop bugging us on successive builds
-  else()
+  if (NOT FORCE_UTF_FILT)
     message(
       FATAL_ERROR
       "Neither the nsgnmls nor onsgmls executable was found.\
@@ -68,7 +63,6 @@ if (TESTING_UTF_FILT)
   endif()
 endif()
 
-option(TESTING_UTF_FILT "Whether to test utf_filt.pl" ${TESTING_UTF_DEFAULT})
 
 configure_file(utf_filt.pl.in utf_filt.pl @ONLY)
 

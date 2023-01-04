@@ -17,6 +17,7 @@ my $usage = "Usage: $0 [<OPTIONS>]
 OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
   -i <dir>:  Directory where expected value files exist
+  -w:        Write expected values instead of comparing
 ";
 
 my $outdir;
@@ -37,7 +38,7 @@ GetOptions(
       unless (-d $opt_value);
     $indir = File::Spec->canonpath($opt_value);
   },
-  "s" => \$set_test
+  "w" => \$set_test
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -55,8 +56,8 @@ sub run_test {
   close($act_fh);
   unless($set_test) {
     if (compare_text($exp, $act)) {
-      print "$name failed\n";
-      system "   diff", $exp, $act;
+      print "   $name failed\n";
+      system "diff", $exp, $act;
       die;
     } else {
       print "   $name passed\n";
