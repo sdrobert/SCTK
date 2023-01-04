@@ -18,6 +18,7 @@ OPTIONS
   -i <dir>:             Directory where files exist
   -e <dir>:             Directory where expected value files exist
   -p <dir>[<dir>,...]:  Paths to search for other scripts
+  -w:                   Write expected values instead of comparing
 ";
 
 my $outdir;
@@ -26,6 +27,7 @@ my $indir = ".";
 my $perl = $Config{perlpath};
 my $base = getcwd();
 my $paths = $base;
+my $set_test = 0;
 $SIG{TERM} = sub {chdir $base;};
 
 GetOptions(
@@ -56,7 +58,8 @@ GetOptions(
       push(@p, File::Spec->rel2abs($_));
     }
     $paths = join($Config::Config{path_sep}, @p);
-  }
+  },
+  "w" => \$set_test
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -81,7 +84,7 @@ sub compare_files {
   my $filtered_exp = File::Temp->new();
   my $filtered_act = File::Temp->new();
   open(my $unfiltered_exp, "<", "$exp_root/$relative_path")
-    or die "$test_id failed: unable to open $exp_root/$relative_path";
+    or die "   Failed: unable to open $exp_root/$relative_path";
   while (<$unfiltered_exp>) {
     # the -I stuff
     next if /[cC]reation[ _]date/;
@@ -92,7 +95,7 @@ sub compare_files {
   close($unfiltered_exp);
   close($filtered_exp);
   open(my $unfiltered_act, "<", "$act_root/$relative_path")
-    or die "$test_id failed: unable to open $act_root/$relative_path";
+    or die "   Failed: unable to open $act_root/$relative_path";
   while (<$unfiltered_act>) {
     next if /[cC]reation[ _]date/;
     next if /md-eval/;
@@ -102,7 +105,7 @@ sub compare_files {
   close($unfiltered_act);
   close($filtered_act);
   if (compare_text($filtered_exp->filename, $filtered_act->filename)) {
-    print "$test_id failed: diff {$exp_root,$act_root}/$relative_path below\n";
+    print "   Failed: diff {$exp_root,$act_root}/$relative_path below\n";
     system "diff", $filtered_exp->filename, $filtered_act->filename;
     return 0;
   }
@@ -112,7 +115,7 @@ sub compare_files {
 sub compare_directories {
   my ($test_id, $relative_path, $exp_root, $act_root) = @_;
   opendir(my $dh, "$exp_root/$relative_path")
-    or die "$test_id error: could not open $exp_root/$relative_path as a directory";
+    or die "   Error: could not open $exp_root/$relative_path as a directory";
   my @fns = readdir $dh;
   closedir($dh);
   my $rv = 1;
@@ -126,7 +129,7 @@ sub compare_directories {
     }
   }
   opendir($dh, "$act_root/$relative_path")
-    or die "$test_id error: could not open $exp_root/$relative_path as a directory";
+    or die "   Error: could not open $exp_root/$relative_path as a directory";
   my @fns2 = readdir $dh;
   closedir($dh);
   foreach my $fn (@fns2) {
@@ -143,20 +146,23 @@ sub compare_directories {
 
 sub run_test {
   my ($name, $cmd, $glm, $ref, $exp, @systems) = @_;
-  print "Beginning $name\n";
-  my $act_dir = File::Spec->catfile($outdir, basename($exp.".act"));
-  if (-d $act_dir) {
-    remove_tree($act_dir, {
-      safe => 1,
-      keep_root => 1
-    }) or die "Error $name: Could not clear $act_dir";
-  } else {
-    mkdir($act_dir) or die "Error $name: Could not create directory $act_dir: $!";
+  print "   Beginning $name\n";
+  my $act_dir = $exp;
+  unless ($set_test) {
+    $act_dir = File::Spec->catfile($outdir, basename($exp.".act"));
+    if (-d $act_dir) {
+      remove_tree($act_dir, {
+        safe => 1,
+        keep_root => 1
+      }) or die "Error $name: Could not clear $act_dir";
+    } else {
+      mkdir($act_dir) or die "Error $name: Could not create directory $act_dir: $!";
+    }
   }
   chdir($act_dir) or die "Error $name: Could not move to directory $act_dir";
   my $rel_glm = basename($glm);
-  copy($glm, $rel_glm) or die "Error $name: Could not copy $glm to $act_dir/$rel_glm: $!";
   my $rel_ref = basename($ref);
+  copy($glm, $rel_glm) or die "Error $name: Could not copy $glm to $act_dir/$rel_glm: $!";
   copy($ref, $rel_ref) or die "Error $name: Could not copy $ref to $act_dir/$rel_ref: $!";
   my @rel_systems;
   foreach my $fp (@systems) {
@@ -167,8 +173,12 @@ sub run_test {
   my $rel_systems_ = join(" ", @rel_systems);
   $cmd .= " -g $rel_glm -r $rel_ref $rel_systems_ > log";
   system($cmd) == 0
-    or die "$name failed: error code $?";
-  compare_directories($name, ".", $exp, $act_dir) or die;
+    or die "   Failed: error code $?";
+  unless($set_test) {
+    compare_directories($name, ".", $exp, $act_dir) or die;
+  } else {
+    print "   Wrote $name to $act_dir\n";
+  }
 }
 
 my $prefix = "$perl $base/hubscr.pl -p $paths";

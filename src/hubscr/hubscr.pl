@@ -466,9 +466,8 @@ sub VerifyResources
 {
     my($ver, $buffer);
 
-    ### Check the version of sclite
-    $ver = "";
-
+    ### Check the version of asclite
+    $ver = $buffer = "";
     run(
         command => $ASCLITE,
         buffer => \$buffer
@@ -494,7 +493,6 @@ sub VerifyResources
 	 "       Version 1.1 or better is needed.  This package ls available\n".
 	 "       from the URL http://www.nist.gov/speech/software.htm") if (not($ver) or $ver < 1.1);
 
-    #### Check for CSRFILT
     $ver = &get_version($CSRFILT,"csrfilt.pl");
     die ("CSRFILT executed by the command '$CSRFILT' is too old. \n".
 	 "       Version 1.15 or better is needed.  Get the up-to-date SCTK package\n".
