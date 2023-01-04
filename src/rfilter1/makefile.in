@@ -15,19 +15,18 @@ OPTIONS=-DNEED_STRCMP=1 $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)
 
 PREFIX=
 bindir = $(PREFIX)/bin
+T = ../test_suite
 
 rfilter1: rfilter1.c
 	@echo "On cygwin, it is possible this compilation will fail, please see/adapt the rfilter1/makefile OPTIONS entry"
 	gcc $(OPTIONS) -o rfilter1 rfilter1.c
 
 setTests:
-	./rfilter1 ../test_suite/test.arb2004.glm < ../test_suite/test.arb2004.txt > ../test_suite/test.arb2004.txt.rfilter1
-	./rfilter1 ../test_suite/test.man2004.glm < ../test_suite/test.man2004.txt > ../test_suite/test.man2004.txt.rfilter1
+	@perl RFilter1Tests.pl -s ./rfilter1 -i $(T) -w
 
-check:
+check: all
 	@echo "Testing rfilter1"
-	./rfilter1 ../test_suite/test.arb2004.glm < ../test_suite/test.arb2004.txt | diff - ../test_suite/test.arb2004.txt.rfilter1
-	./rfilter1 ../test_suite/test.man2004.glm < ../test_suite/test.man2004.txt | diff - ../test_suite/test.man2004.txt.rfilter1
+	@perl RFilter1Tests.pl -s ./rfilter1 -i $(T)
 	@echo "   rfilter1 tests successfully completed"
 
 install: all

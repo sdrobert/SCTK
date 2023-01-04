@@ -22,6 +22,6 @@ if (TESTING_RFILTER1)
     NAME test_ctm_validator
     COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/RFilter1Tests.pl
       -i ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite
-      $<TARGET_FILE:rfilter1>
+      -s $<TARGET_FILE:rfilter1>
   )
 endif()
