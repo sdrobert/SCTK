@@ -491,7 +491,7 @@ foreach $_ (@Trans){
             print "      Step 3 $_\n" if ($vb);
 
 	    #Change 1st unintelligable word, if its an alternate
-            s:\(\(\s*({[^{}]+})\s+(($plainWord|$optDelWord)(\s+($plainWord|$optDelWord))*\s*\)\)): \($1\) \(\($2:g;
+            s:\(\(\s*(\{[^{}]+\})\s+(($plainWord|$optDelWord)(\s+($plainWord|$optDelWord))*\s*\)\)): \($1\) \(\($2:g;
             print "      Step 4 $_\n" if ($vb);
 
 	    #Change 1st unintelligable word, if its a plain word
@@ -503,7 +503,7 @@ foreach $_ (@Trans){
             print "      Step 8 $_\n" if ($vb);
 
             #alternate single unintelligable with alternate
-            s/\(\(\s*({[^{}]+})\s*\)\)/ \($1\) /g;
+            s/\(\(\s*(\{[^{}]+\})\s*\)\)/ \($1\) /g;
             print "      Step 9 $_\n" if ($vb);
 
             #alternate single unintelligable words
