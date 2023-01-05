@@ -11,7 +11,9 @@ if (TESTING_CSRFILT)
 
   add_test(
     NAME test_csrfilt
-    COMMAND ${PERL_EXECUTABLE} RunTests.pl -r $<TARGET_FILE:rfilter1>
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/CsrfiltTests.pl
+      -r $<TARGET_FILE:rfilter1>
+      -i ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite
+      -o out
   )
 endif()

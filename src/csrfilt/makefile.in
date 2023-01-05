@@ -4,7 +4,7 @@
 SHELL = /bin/sh
 PREFIX=
 bindir = $(PREFIX)/bin
-T=../test_suite
+T = ../test_suite
 
 all: csrfilt.sh
 
@@ -12,11 +12,11 @@ csrfilt.sh:
 	chmod +x csrfilt.sh
 
 setTests:
-	./RunTests.pl setTests
+	@perl CsrfiltTests.pl -i $(T) -r ../rfilter1/rfilter1 -w
 
 check: all
 	@echo "Testing csrfilt.sh"
-	./RunTests.pl
+	@perl CsrfiltTests.pl -i $(T) -r ../rfilter1/rfilter1 
 	@echo "   csrfilt.sh successfully completed"
 
 install: all

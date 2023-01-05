@@ -12,5 +12,6 @@ if (TESTING_HAMZA_NORM)
     NAME test_hamza_norm
     COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/HamzaNormTests.pl
       -i ${CMAKE_CURRENT_SOURCE_DIR}/../test_suite
+      -o out
   )
 endif()
