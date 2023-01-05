@@ -14,11 +14,13 @@ my $usage = "Usage: $0 [<OPTIONS>]
 OPTIONS
   -o <dir>:  Store results in desired folder instead of a temporary one.
   -i <dir>:  Directory where expected value files exist
+  -w:        Write expected values instead of comparing
 ";
 
 my $outdir;
 my $indir = ".";
 my $perl = $Config{perlpath};
+my $set_test = 0;
 
 GetOptions(
   "o=s" => sub {
@@ -32,7 +34,8 @@ GetOptions(
     die "Error -$opt_name expected existing directory, got $opt_value"
       unless (-d $opt_value);
     $indir = File::Spec->canonpath($opt_value);
-  }
+  },
+  "w" => \$set_test
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -41,19 +44,23 @@ unless (defined($outdir)) {
 
 sub run_test {
   my ($name, $cmd, $exp) = @_;
-  print "Beginning $name\n";
+  print "   Beginning $name\n";
   $exp = File::Spec->catfile($indir, $exp);
-  my $act = File::Spec->catfile($outdir, basename($exp).".act");
+  my $act = $set_test ? $exp : File::Spec->catfile($outdir, basename($exp).".act");
   open(my $act_fh, '>', $act);
   print $act_fh `$cmd`;
   # die "$name error: $!" if $?;
   close($act_fh);
-  if (compare_text($exp, $act)) {
-    print "$name failed\n";
-    system "diff", $exp, $act;
-    die;
+  unless ($set_test) {
+    if (compare_text($exp, $act)) {
+      print "   $name failed\n";
+      system "diff", $exp, $act;
+      die;
+    } else {
+      print "   $name passed\n";
+    }
   } else {
-    print "$name passed\n";
+    print "   Wrote $name to $act\n";
   }
 }
 
