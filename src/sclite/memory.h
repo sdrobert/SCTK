@@ -37,12 +37,12 @@ int _msz_;
 #ifndef WARN_ZERO_MALLOC
 #define alloc_singarr(_arg,_len,_type) \
   {  if ((_msz_=(_len)) == 0) _msz_++; \
-     if ((_arg=(_type *)calloc(_msz_, sizeof(_type)))==(_type *)NULL) malloc_died(_msz_); }
+     if ((_arg=(_type *)calloc((unsigned long) _msz_, (unsigned long) sizeof(_type)))==(_type *)NULL) malloc_died(_msz_); }
 #else
 #define alloc_singarr(_arg,_len,_type) \
   {  if ((_msz_=(_len)) == 0) \
         { printf("Warning: malloc of size 0 changed to 1\n"); _msz_++; } \
-     if ((_arg=(_type *)calloc(_msz_, sizeof(_type)))==(_type *)NULL) malloc_died(_msz_); }
+     if ((_arg=(_type *)calloc((unsigned long)_msz_, (unsigned long) sizeof(_type)))==(_type *)NULL) malloc_died(_msz_); }
 #endif
 
 /*#define alloc_singarr(_arg,_len,_type) \ */

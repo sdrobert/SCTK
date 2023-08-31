@@ -953,7 +953,7 @@ void set_temp_files(char *refwords, char *hypwords){
 
 SCORES *align_trans_mode_diff(char *ref_file, char *hyp_file, char *set_title, int keep_path, int case_sense, int feedback, enum id_types idt){
     FILE *fp_hyp, *fp_diff;
-    TEXT *hyp_buff, *hyp_id, *spkr_id, *diff_out;
+    TEXT *hyp_buff=NULL, *hyp_id, *spkr_id, *diff_out;
     int hyp_buff_len=LOAD_BUFF_LEN, hyp_id_len=LOAD_BUFF_LEN;
     int spkr_id_len=LOAD_BUFF_LEN, diff_out_len=LOAD_BUFF_LEN;
     PATH *path;

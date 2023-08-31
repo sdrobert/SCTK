@@ -29,6 +29,12 @@ my $base = getcwd();
 my $paths = $base;
 my $set_test = 0;
 $SIG{TERM} = sub {chdir $base;};
+my $diff;
+if ("$^O" =~ /win/i) {
+  $diff = "FC";
+} else {
+  $diff = "diff";
+}
 
 GetOptions(
   "o=s" => sub {
@@ -106,7 +112,7 @@ sub compare_files {
   close($filtered_act);
   if (compare_text($filtered_exp->filename, $filtered_act->filename)) {
     print "   Failed: diff {$exp_root,$act_root}/$relative_path below\n";
-    system "diff", $filtered_exp->filename, $filtered_act->filename;
+    system "$diff", $filtered_exp->filename, $filtered_act->filename;
     return 0;
   }
   return 1;

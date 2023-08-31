@@ -68,5 +68,5 @@ my $prefix = "$perl hamzaNorm.pl";
 # run_test("testmss", "$prefix -m -l english $indir/testmss.in -- -", "testmss.stm");
 run_test("arb2004", "$prefix -- $indir/test.arb2004.txt -", "test.arb2004.hamzaNorm.txt");
 run_test("arb2004_stm_1", "$perl -pe \"s/<O>//\" < $indir/test.arb2004.txt.stm | $prefix -i stm -- - -", "test.arb2004.txt.stm.hamza");
-run_test("arb2004_stm_2", "$prefix -i stm -- $indir/test.arb2004.txt.stm - | perl -pe \"s/<O>//\"", "test.arb2004.txt.stm.hamza");
-run_test("arb2004_ctm", "$prefix -i ctm -- $indir/test.arb2004.txt.ctm - | perl -pe \"s/<O>//\"", "test.arb2004.txt.ctm.hamza");
+run_test("arb2004_stm_2", "$prefix -i stm -- $indir/test.arb2004.txt.stm - | $perl -pe \"s/<O>//\"", "test.arb2004.txt.stm.hamza");
+run_test("arb2004_ctm", "$prefix -i ctm -- $indir/test.arb2004.txt.ctm - | $perl -pe \"s/<O>//\"", "test.arb2004.txt.ctm.hamza");

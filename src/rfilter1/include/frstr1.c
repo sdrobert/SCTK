@@ -6,7 +6,7 @@
 
 void free_str(Char *s)
 {if ((s != NULL)&&(s != EMPTY_STRING)&&(s != (Char*)EMPTY_INT_STRING))
-     {if (memory_trace) printf("*DB: FREE %lx\n",(long)s);
+     {if (memory_trace) printf("*DB: FREE %lx\n",s);
       free((Char*)s);
      }
    return;

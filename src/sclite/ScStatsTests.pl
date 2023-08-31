@@ -28,13 +28,13 @@ my $indir = ".";
 my $sc_stats = "sc_stats";
 my $scl_flags = "";
 my $perl = $Config{perlpath};
-my $cat;
-my $set_test = 0;
+my ($cat, $diff);
 if ("$^O" =~ /win/i) {
-    $cat = "type";
+  ($cat, $diff) = ("type", "FC");
 } else {
-    $cat = "cat";
+  ($cat, $diff) = ("cat", "diff");
 }
+my $set_test = 0;
 
 GetOptions(
   "o=s" => sub {
@@ -55,7 +55,9 @@ GetOptions(
       unless (-x $opt_value);
     $sc_stats = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
   },
-  "w" => \$set_test
+  "w" => \$set_test,
+  "d" => \$has_diff,
+  "t" => \$has_slm,
 ) or die "$usage";
 
 unless (defined($outdir)) {
@@ -94,7 +96,7 @@ sub compare_files {
   close($filtered_act);
   if (compare_text($filtered_exp->filename, $filtered_act->filename)) {
     print "   Failed: diff {$exp_root,$act_root}/$relative_path below\n";
-    system "diff", $filtered_exp->filename, $filtered_act->filename;
+    system "$diff", File::Spec->canonpath($filtered_exp->filename), File::Spec->canonpath($filtered_act->filename);
     die;
   }
   return 1;

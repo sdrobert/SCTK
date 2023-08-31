@@ -17,14 +17,19 @@ use strict;
 use Config;
 use Getopt::Long;
 use File::Spec;
+use File::Basename;
+use File::Temp;
 use File::Compare qw(compare_text);
 
 my $scliteCom = "sclite";
 my $ascliteCom = "asclite";
-my $compatOutDir = my $compatInDir = "scliteCompatTestOutDir";
-my $ascliteTestOutDir = my $ascliteTestInDir = "ascliteTestOutDir";
+my $compatInDir = "scliteCompatTestOutDir";
+my $ascliteTestInDir = "ascliteTestOutDir";
+my $outdir;
 my $failure = 0;
+my $base = File::Spec->rel2abs(dirname(__FILE__));
 my $perl = $Config{perlpath};
+my $set_test = 0;
 
 ####################
 sub error_exit { exit(1); }
@@ -51,16 +56,32 @@ GetOptions(
         unless (-x $opt_value);
       $scliteCom = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
     },
+    "c=s" => sub {
+        my ($opt_name, $opt_value) = @_;
+        die "Error -$opt_name expected existing directory, got $opt_value"
+            unless (-d $opt_value);
+        $compatInDir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
+    },
+    "d=s" => sub {
+        my ($opt_name, $opt_value) = @_;
+        die "Error -$opt_name expected existing directory, got $opt_value"
+            unless (-d $opt_value);
+        $ascliteTestInDir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
+    },
     "o=s" => sub {
       my ($opt_name, $opt_value) = @_;
       die "Error -$opt_name expected directory name, got $opt_value"
         unless (-d $opt_value || mkdir($opt_value));
-      $compatOutDir = $ascliteTestOutDir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
-    }
+      $outdir = File::Spec->rel2abs(File::Spec->canonpath($opt_value));
+    },
+    "w" => \$set_test
 ) or &error_quit("Aborting:\n$Usage\n");
 
-# $scliteCom = File::Spec->canonpath($scliteCom);
-# $ascliteCom = File::Spec->canonpath($ascliteCom);
+chdir($base);
+
+unless (defined($outdir)) {
+  $outdir = File::Temp->newdir();
+}
 
 my $perl_pipe;
 my $nul = File::Spec->devnull();
@@ -78,6 +99,7 @@ sub check_result {
         $failure = 1;
         return;
     }
+    die "   Error: $exp does not exist" unless (-f $exp);
     if (compare_text($exp, $act)) {
         # only do diff if the text differs (to minimize incompatibility chance)
         my $diffCom = "diff $exp $act";
@@ -92,8 +114,8 @@ sub check_result {
             return;
         }
     }
-    print "      Successful Test.  Removing $act\n";
-    unlink $act;
+    print "      Successful Test";
+    # unlink $act;
 }
 
 if ($suite =~ /^(std|all|passed)$/)
@@ -167,20 +189,20 @@ sub RunCompatTest
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         system "$scliteCom $opts $refOpts $hypOpts -o sgml stdout -f 3 | $perl_pipe > $compatInDir/$testId.sgml";
+    } else {
+        print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
+        my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
+        my $ret = system "$com |  $perl_pipe > $outdir/$testId.sgml.asclite";
+
+        check_result($testId, $com, $ret, "$compatInDir/$testId.sgml", "$outdir/$testId.sgml.asclite");
     }
-
-    print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-    my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
-    my $ret = system "$com |  $perl_pipe > $compatOutDir/$testId.sgml.asclite";
-
-    check_result($testId, $com, $ret, "$compatInDir/$testId.sgml", "$compatOutDir/$testId.sgml.asclite");
 }
 
 sub RunAscliteTest
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
 
-    if (! -f "$ascliteTestInDir/$testId.sgml")
+    if ($set_test)
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         print "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0 | $perl_pipe > $ascliteTestInDir/$testId.sgml";
@@ -188,29 +210,31 @@ sub RunAscliteTest
     }
     else
     {
+        
         print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         my $com = "$ascliteCom $opts $refOpts $hypOpts -o sgml stdout -f 0";
-        my $ret = system "$com |  $perl_pipe > $ascliteTestOutDir/$testId.sgml.asclite";
+        my $ret = system "$com | $perl_pipe > $outdir/$testId.sgml.asclite";
 
-        check_result($testId, $com, $ret, "$ascliteTestInDir/$testId.sgml", "$ascliteTestOutDir/$testId.sgml.asclite");
+        check_result($testId, $com, $ret, "$ascliteTestInDir/$testId.sgml", "$outdir/$testId.sgml.asclite");
     }
 }
 
+# FIXME(sdrobert): usage?
 sub RunAscliteTestLog
 {
     my ($testId, $opts, $refOpts, $hypOpts) = @_;
 
-    if (! -f "$ascliteTestOutDir/$testId.log")
+    if ($set_test)
     {
         print "Building Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
-        system "$ascliteCom $opts $refOpts $hypOpts -f 6 2> $ascliteTestOutDir/$testId.log > $nul";
+        system "$ascliteCom $opts $refOpts $hypOpts -f 6 2> $outdir/$testId.log > $nul";
     }
     else
     {
         print "Comparing asclite to Authoritative SGML file: $opts, $refOpts, $hypOpts\n";
         my $com = "$ascliteCom $opts $refOpts $hypOpts -f 6";
-        my $ret = system "$com 2> $ascliteTestOutDir/$testId.log.asclite > $nul";
+        my $ret = system "$com 2> $outdir/$testId.log.asclite > $nul";
 
-        check_result($testId, $com, $ret, "$ascliteTestOutDir/$testId.log", "$ascliteTestOutDir/$testId.log.asclite");
+        check_result($testId, $com, $ret, "$outdir/$testId.log", "$outdir/$testId.log.asclite");
     }
 }

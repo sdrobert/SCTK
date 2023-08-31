@@ -20,9 +20,13 @@ config:
 	(cd core && sh config.sh -prefix=${PREFIX})
 	(cd test && sh config.sh -prefix=${PREFIX})
 
-checkFast:
+checkFast: all
+	(cd testfiles && perl ascliteTest.pl -s std -a ../core/asclite -b ../../sclite/sclite)
 
-check: all checkFast
+setTests: all
+	(cd testfiles && perl ascliteTest.pl -s all -a ../core/asclite -b ../../sclite/sclite -w)
+
+check: all
 	(cd core && if test -f makefile ; then $(MAKE) $@ ; fi)
 	(cd test && if test -f makefile ; then $(MAKE) $@ ; fi)
-	(cd testfiles && perl ascliteTest.pl -s all)
+	(cd testfiles && perl ascliteTest.pl -s all -a ../core/asclite -b ../../sclite/sclite)

@@ -72,7 +72,7 @@ for (my $i = 1; $i < 37; ++$i) {
     if (-f "$indir/$tn.stm.toskip") {
       print "$tn skipped\n";
     } else {
-      run_test("$tn", "$prefix -i $indir/$tn.stm | perl -pe \"s/^Validated .*$tn\.stm/Validated $tn.stm/\"", "$tn.log.saved");
+      run_test("$tn", "$prefix -i $indir/$tn.stm | $perl -pe \"s/^Validated .*$tn\.stm/Validated $tn.stm/\"", "$tn.log.saved");
     }
   }
 }

@@ -17,8 +17,12 @@
 #   define strncasecmp strncmpi
 #elif defined (__WIN32__) || defined(WIN32)
 #   define snprintf _snprintf
-#   define strcasecmp stricmp
-#   define strncasecmp strnicmp
+#   ifndef strcasecmp
+#      define strcasecmp stricmp
+#   endif
+#   ifndef strncasecmp
+#      define strncasecmp strnicmp
+#   endif
 #endif
 
 #define streq(cs,ct)            (strcmp(cs,ct)  == 0)

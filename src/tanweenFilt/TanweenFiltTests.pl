@@ -68,10 +68,10 @@ my $prefix = "$perl tanweenFilt.pl";
 run_test("arb2004", "$prefix -- $indir/test.arb2004.txt -", "test.arb2004.tanweenFilt.txt");
 run_test("arb2004_a", "$prefix -a -- $indir/test.arb2004.txt -", "test.arb2004.tanweenFilt-a.txt");
 run_test("arb2004_stm_1", "$perl -pe \"s/<O>//\" < $indir/test.arb2004.txt.stm | $prefix -i stm -- - -", "test.arb2004.txt.stm.tanween");
-run_test("arb2004_stm_2", "$prefix -i stm -- $indir/test.arb2004.txt.stm - | perl -pe \"s/<O>//\"", "test.arb2004.txt.stm.tanween");
-run_test("arb2004_stm_2_a", "$prefix -a -i stm -- $indir/test.arb2004.txt.stm - | perl -pe \"s/<O>//\"", "test.arb2004.txt.stm.tanween-a");
-run_test("arb2004_ctm", "$prefix -i ctm -- $indir/test.arb2004.txt.ctm - | perl -pe \"s/<O>//\"", "test.arb2004.txt.ctm.tanween");
-run_test("arb2004_ctm_a", "$prefix -a -i ctm -- $indir/test.arb2004.txt.ctm - | perl -pe \"s/<O>//\"", "test.arb2004.txt.ctm.tanween-a");
+run_test("arb2004_stm_2", "$prefix -i stm -- $indir/test.arb2004.txt.stm - | $perl -pe \"s/<O>//\"", "test.arb2004.txt.stm.tanween");
+run_test("arb2004_stm_2_a", "$prefix -a -i stm -- $indir/test.arb2004.txt.stm - | $perl -pe \"s/<O>//\"", "test.arb2004.txt.stm.tanween-a");
+run_test("arb2004_ctm", "$prefix -i ctm -- $indir/test.arb2004.txt.ctm - | $perl -pe \"s/<O>//\"", "test.arb2004.txt.ctm.tanween");
+run_test("arb2004_ctm_a", "$prefix -a -i ctm -- $indir/test.arb2004.txt.ctm - | $perl -pe \"s/<O>//\"", "test.arb2004.txt.ctm.tanween-a");
 # cat $(T)/test.arb2004.txt | ./tanweenFilt.pl -- - - | diff - $(T)/test.arb2004.tanweenFilt.txt
 # cat $(T)/test.arb2004.txt | ./tanweenFilt.pl -a -- - - | diff - $(T)/test.arb2004.tanweenFilt-a.txt
 # cat $(T)/test.arb2004.txt.stm | sed 's/<O>//' | ./tanweenFilt.pl -i stm -- - - | diff - $(T)/test.arb2004.txt.stm.tanween

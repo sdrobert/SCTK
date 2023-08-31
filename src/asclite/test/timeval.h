@@ -2,7 +2,7 @@
  * ASCLITE
  * Author: Jerome Ajot, Jon Fiscus, Nicolas Radde, Chris Laprun
  *
- * This software was developed at the National Institute of Standards and Technology by
+ * This software was developed at the National Institute of Standards and Technology by 
  * employees of the Federal Government in the course of their official duties. Pursuant
  * to title 17 Section 105 of the United States Code this software is not subject to
  * copyright protection and is in the public domain. ASCLITE is an experimental system.
@@ -30,18 +30,14 @@
 #define EPOCHFILETIME (116444736000000000LL)
 #endif
 
-// XXX(sdrobert): already part of time.h, no?
-// struct timeval
-// {
-//     long tv_sec;   /* seconds */
-//     long tv_usec;  /* microseconds */
-// };
-
+#ifndef _TIMEZONE_DEFINED
+#define _TIMEZONE_DEFINED
 struct timezone
 {
     int tz_minuteswest; /* minutes W of Greenwich */
     int tz_dsttime;     /* type of dst correction */
 };
+#endif
 
 __inline int gettimeofday(struct timeval *tv, struct timezone *tz)
 {
