@@ -52,7 +52,7 @@ else
 	SLM_ENABLED=1
 	echo "    SLM-Toolkit Enabled"
 fi
-sclecho ""
+echo ""
 
 if [ -d $OUT ] ; then
 	echo "Shall I delete the output directory \"$OUT\"'s contents [y]"
@@ -81,6 +81,7 @@ doit(){
    prereq="$5"
 
    echo "$testid: $desc"
+   echo $exe_dir/${exe_name} $com > $OUT/$testid.com
    if [ "$prereq" = "SLM" ] ; then
         if test $SLM_ENABLED = 1 ; then
             $exe_dir/${exe_name} $com 1> $OUT/$testid.out 2> $OUT/$testid.err
@@ -231,7 +232,7 @@ TN=7
 TEST=test$TN
 echo "Test $TN:     Run some test cases through"
 $scliteCom ${SCLFLAGS} -r $DATA/tests.ref -h $DATA/tests.hyp -i spu_id \
-	-o all -O $OUT -f 0 -n $TEST -F -D \
+	   -o all -O $OUT -f 0 -n $TEST -F -D \
 	1> $OUT/$TEST.out 2> $OUT/$TEST.err
 
 # TEST Number 7_r
@@ -240,6 +241,14 @@ TEST=test$TN
 echo "Test $TN:   Run some test cases through (reversing ref and hyp)"
 $scliteCom ${SCLFLAGS} -h $DATA/tests.ref -r $DATA/tests.hyp -i spu_id \
 	-o all -O $OUT -f 0 -n $TEST -F -D \
+	1> $OUT/$TEST.out 2> $OUT/$TEST.err
+
+# TEST Number 7_noD - Turns off Optionally deletable
+TN=7_noD
+TEST=test$TN
+echo "Test $TN:   Run some test cases through (reversing ref and hyp)"
+$scliteCom ${SCLFLAGS} -r $DATA/tests.ref -h $DATA/tests.hyp -i spu_id \
+	-o all -O $OUT -f 0 -n $TEST -F \
 	1> $OUT/$TEST.out 2> $OUT/$TEST.err
 
 # TEST Number 7_1
@@ -388,12 +397,28 @@ $scliteCom ${SCLFLAGS} -r $DATA/tima_ref.ctm ctm -h $DATA/tima_hyp.ctm ctm \
 	1> $OUT/$TEST.out 2> $OUT/$TEST.err
 #grep -v 'Creation date:' < out/$TEST.prf > x ; mv x out/$TEST.prf
 
+# TEST Number 13_D
+TN=13_D
+TEST=test$TN
+echo "Test $TN:    Run alignments on two CTM files, using DP Word alignments"
+$scliteCom ${SCLFLAGS} -r $DATA/tima_ref.ctm ctm -h $DATA/tima_hyp.ctm ctm \
+	-o all prf -O $OUT -f 0 -n $TEST -D \
+	1> $OUT/$TEST.out 2> $OUT/$TEST.err
+
 # TEST Number 13_a
 TN=13_a
 TEST=test$TN
 echo "Test $TN:  Run alignments on two CTM files, using Time-Mediated DP alignments"
 $scliteCom ${SCLFLAGS} -r $DATA/tima_ref.ctm ctm -h $DATA/tima_hyp.ctm ctm \
 	-o all -O $OUT -f 0 -n $TEST -T \
+	1> $OUT/$TEST.out 2> $OUT/$TEST.err
+
+# TEST Number 13_aD - Add optionality processing
+TN=13_aD
+TEST=test$TN
+echo "Test $TN:  Run alignments on two CTM files, using Time-Mediated DP alignments"
+$scliteCom ${SCLFLAGS} -r $DATA/tima_ref.ctm ctm -h $DATA/tima_hyp.ctm ctm \
+	-o all -O $OUT -f 0 -n $TEST -T -D \
 	1> $OUT/$TEST.out 2> $OUT/$TEST.err
 
 # TEST Number 14_a
@@ -458,6 +483,13 @@ TEST=test15_c
 doit $TEST \
         "UTF-8 test - UTF-8 Turkish" \
         "${SCLFLAGS} -r $DATA/test.turkish.ref trn -h $DATA/test.turkish.hyp -o all prf -O $OUT -f 0 -n $TEST -e utf-8 babel_turkish -i spu_id" \
+        "" \
+        ""
+
+TEST=test15_d
+doit $TEST \
+        "UTF-8 test - UTF-8 Ukranian" \
+        "${SCLFLAGS} -r $DATA/test.ukranian.ref trn -h $DATA/test.ukranian.hyp -o all prf -O $OUT -f 0 -n $TEST -e utf-8 ukrainian -i spu_id" \
         "" \
         ""
 
