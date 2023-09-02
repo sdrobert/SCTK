@@ -1,0 +1,158 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "FORCE_UTF_FILT": "ON"
+      },
+      "architecture": {
+        "strategy": "external"
+      },
+      "toolset": {
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "vcpp-x64",
+      "inherits": "base",
+      "hidden": true,
+      "architecture": {
+        "value": "x64"
+      },
+      "toolset": {
+        "value": "host=x64"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": ["Windows"],
+          "intelliSenseMode": "windows-msvc-x64"
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "mingw",
+      "generator": "MinGW Makefiles",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc.exe",
+        "CMAKE_CXX_COMPILER": "gcc.exe"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": ["Windows"],
+          "intelliSenseMode": "linux-gcc-x64"
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "vcpp-x64-debug",
+      "displayName": "Visual C++ x64 in debug mode",
+      "inherits": "vcpp-x64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "vcpp-x64-release",
+      "displayName": "Visual C++ x64 in release mode",
+      "inherits": "vcpp-x64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "mingw-debug",
+      "displayName": "MinGW in debug mode",
+      "inherits": "mingw",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "mingw-release",
+      "displayName": "MinGW in release mode",
+      "inherits": "mingw",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default-build-base",
+      "displayName": "default build",
+      "hidden": true,
+      "configurePreset": "base"
+    },
+    {
+      "name": "default-build-vcpp-x64-debug",
+      "inherits": "default-build-base",
+      "configurePreset": "vcpp-x64-debug"
+    },
+    {
+      "name": "default-build-mingw-debug",
+      "inherits": "default-build-base",
+      "configurePreset": "mingw-debug"
+    },
+    {
+      "name": "default-build-vcpp-x64-release",
+      "inherits": "default-build-base",
+      "configurePreset": "vcpp-x64-release"
+    },
+    {
+      "name": "default-build-mingw-release",
+      "inherits": "default-build-base",
+      "configurePreset": "mingw-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default-test-base",
+      "hidden": true,
+      "displayName": "Default test",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "default-test-vcpp-x64-debug",
+      "inherits": "default-test-base",
+      "configurePreset": "vcpp-x64-debug"
+    },
+    {
+      "name": "default-test-mingw-debug",
+      "inherits": "default-test-base",
+      "configurePreset": "mingw-debug"
+    },
+    {
+      "name": "default-test-vcpp-x64-release",
+      "inherits": "default-test-base",
+      "configurePreset": "vcpp-x64-release"
+    },
+    {
+      "name": "default-test-mingw-release",
+      "inherits": "default-test-base",
+      "configurePreset": "mingw-release"
+    }
+  ]
+}

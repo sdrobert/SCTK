@@ -15,7 +15,7 @@ if (db_level > 3) printf("%sdoing %s\n",pdb,proc);
  pd = (Char*)malloc((size_t)strlen((char *)ps)+1);
  if (pd == NULL) fatal_error(calling_proc,(Char *)"MEM ALLOC",-1);
   else   pd = (Char *)strcpy((char *)pd,(char *)ps);
- if (memory_trace) printf("%s MALLOC %lx\n",pdb,pd);
+ if (memory_trace) printf("%s MALLOC %p\n",pdb,(void *) pd);
   return pd;
  }
 /* end strdup2.c */
